@@ -280,6 +280,7 @@ M.mason = {
     -- IaC, DevXp, DevOps
     "ansible-language-server",
     "ansible-lint",
+    -- "autotools-language-server",
     "dockerfile-language-server",
     "docker-compose-language-service",
     "terraform-ls",
@@ -313,6 +314,7 @@ M.mason = {
 
     -- Java
     -- "jdtls",
+    -- "kotlin-language-server",
 
     -- Yaml
     "yaml-language-server",
@@ -322,6 +324,7 @@ M.mason = {
 
     -- Go
     "delve",
+    "go-debug-adapter",
     "goimports",
     "goimports-reviser",
     "golangci-lint",
