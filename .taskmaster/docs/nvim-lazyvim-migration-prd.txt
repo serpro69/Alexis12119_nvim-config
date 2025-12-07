@@ -1,0 +1,798 @@
+# Product Requirements Document: Neovim Configuration Migration
+# NvChad to LazyVim + NvChad UI Components
+
+## 1. Overview
+
+### 1.1 Project Summary
+Migrate a personal Neovim configuration fork from a pure NvChad-based setup to the new upstream architecture that uses LazyVim as the foundation with optional NvChad UI components (statusline, tabufline, base46 themes).
+
+### 1.2 Background
+The upstream repository (Alexis12119/nvim-config) migrated from pure NvChad to LazyVim + NvChad UI components. This migration provides:
+- Better plugin abstractions via LazyVim extras
+- Simplified configuration with sensible defaults
+- Reduced boilerplate for common plugins
+- Maintained access to NvChad's excellent UI components
+
+### 1.3 Goals
+1. Update fork to match new upstream LazyVim-based architecture
+2. Preserve all personal customizations made in the fork
+3. Maintain functionality of custom plugins and keybindings
+4. Ensure smooth transition with minimal disruption to workflow
+
+### 1.4 Non-Goals
+- Complete rewrite of configuration from scratch
+- Removing NvChad UI components (optional - user choice)
+- Adding new features not present in current configuration
+
+---
+
+## 2. Current State Analysis
+
+### 2.1 Upstream Migration Changes (NvChad → LazyVim)
+
+#### 2.1.1 Directory Structure Changes
+
+OLD STRUCTURE:
+```
+lua/
+├── core/
+│   ├── lazy.lua
+│   ├── messages.lua
+│   ├── utils.lua
+│   └── ...
+├── plugins/
+│   ├── ai/
+│   ├── completion/
+│   ├── core/
+│   ├── dap/
+│   ├── editing/
+│   ├── folding/
+│   ├── langs/
+│   ├── lsp/configs/
+│   ├── navigation/
+│   ├── sessions/
+│   ├── terminal/
+│   ├── testing/
+│   ├── ui/
+│   ├── version-control/
+│   └── writing/
+├── mappings.lua
+├── options.lua
+└── chadrc.lua
+```
+
+NEW STRUCTURE:
+```
+lua/
+├── config/
+│   ├── lazy.lua
+│   ├── options.lua
+│   ├── keymaps.lua
+│   ├── autocmds.lua
+│   └── statusline.lua
+├── plugins/
+│   ├── ai/
+│   ├── collaboration/
+│   ├── colorscheme/
+│   ├── dap/
+│   ├── editor/
+│   ├── fun/
+│   ├── integration/
+│   ├── lang/
+│   ├── lsp/
+│   ├── ui/
+│   └── util/
+└── chadrc.lua (optional, for NvChad UI mode)
+```
+
+#### 2.1.2 Type Annotation Changes
+- OLD: `---@type NvPluginSpec`
+- NEW: `---@type LazySpec`
+
+#### 2.1.3 Configuration Entry Point Changes
+- LazyVim bootstrap replaces custom lazy.nvim initialization
+- `lazyvim.json` file controls enabled extras
+- Conditional loading based on `vim.g.colorscheme` variable
+
+#### 2.1.4 Deleted Files (Now Handled by LazyVim)
+
+AI PLUGINS (Deleted - LazyVim provides via extras):
+- lua/plugins/ai/avante.lua
+- lua/plugins/ai/codecompanion.lua
+- lua/plugins/ai/copilot.lua
+- lua/plugins/ai/mcphub.lua
+- lua/plugins/ai/neocodeium.lua
+- lua/plugins/ai/sidekick.lua
+- lua/plugins/ai/supermaven.lua
+- lua/plugins/ai/windsurf.lua
+
+COMPLETION PLUGINS (Deleted):
+- lua/plugins/completion/blink-cmp.lua
+- lua/plugins/completion/nvim-cmp.lua
+
+CORE PLUGINS (Deleted):
+- lua/plugins/core/cloak.lua
+- lua/plugins/core/init.lua (menu, showkeys, typr)
+- lua/plugins/core/nvim-treesitter.lua
+- lua/plugins/core/store.lua
+- lua/plugins/core/utils.lua
+- lua/plugins/core/which-key.lua
+- lua/plugins/core/numb.lua (moved to ui/)
+- lua/plugins/core/vim-suda.lua (moved to util/)
+
+DAP PLUGINS (Deleted):
+- lua/plugins/dap/nvim-dap.lua
+- lua/plugins/dap/nvim-dap-ui.lua
+- lua/plugins/dap/nvim-dap-virtual-text.lua
+
+EDITING PLUGINS (Deleted):
+- lua/plugins/editing/comment.lua
+- lua/plugins/editing/grug-far.lua
+- lua/plugins/editing/harpoon.lua
+- lua/plugins/editing/marks.lua
+- lua/plugins/editing/mini-ai.lua
+- lua/plugins/editing/nvim-spectre.lua
+- lua/plugins/editing/nvim-surround.lua
+- lua/plugins/editing/ts-comments.lua
+
+NAVIGATION PLUGINS (Deleted):
+- lua/plugins/navigation/cinnamon.lua
+- lua/plugins/navigation/flash.lua
+- lua/plugins/navigation/oil.lua
+- lua/plugins/navigation/project.lua
+- lua/plugins/navigation/quicker.lua
+- lua/plugins/navigation/telescope.lua
+- lua/plugins/navigation/tmux-navigation.lua
+- lua/plugins/navigation/todo-comments.lua
+
+SESSION PLUGINS (Deleted):
+- lua/plugins/sessions/auto-session.lua
+- lua/plugins/sessions/persisted.lua
+
+TERMINAL PLUGINS (Deleted):
+- lua/plugins/terminal/toggleterm.lua
+
+TESTING PLUGINS (Deleted):
+- lua/plugins/testing/compiler.lua (old version)
+- lua/plugins/testing/neotest.lua
+
+LSP PLUGINS (Deleted):
+- lua/plugins/lsp/configs/conform.lua
+- lua/plugins/lsp/configs/lsp-lens.lua
+- lua/plugins/lsp/configs/lspsaga.lua
+- lua/plugins/lsp/configs/mason.lua
+- lua/plugins/lsp/configs/nvim-lint.lua
+- lua/plugins/lsp/configs/nvim-lspconfig.lua
+- lua/plugins/lsp/configs/refractoring.lua
+- lua/plugins/lsp/configs/sonarlint.lua
+- lua/plugins/lsp/configs/tiny-inline-diagnostic.lua
+- lua/plugins/lsp/configs/trouble.lua
+- lua/plugins/lsp/configs/typescript-tools.lua
+- lua/plugins/lsp/configs/lazydev.lua (moved to util/)
+
+LANG PLUGINS (Deleted):
+- lua/plugins/langs/jdtls.lua
+- lua/plugins/langs/kulala.lua
+- lua/plugins/langs/nvim-java.lua
+- lua/plugins/langs/rustaceanvim.lua
+- lua/plugins/langs/venv-selector.lua
+
+UI PLUGINS (Deleted):
+- lua/plugins/ui/colorizer.lua
+- lua/plugins/ui/dressing.lua
+- lua/plugins/ui/image.lua
+- lua/plugins/ui/indent-blankline.lua
+- lua/plugins/ui/nvim-notify.lua
+- lua/plugins/ui/sidebar.lua
+
+VERSION CONTROL PLUGINS (Deleted):
+- lua/plugins/version-control/diffview.lua
+- lua/plugins/version-control/git-blame.lua
+- lua/plugins/version-control/gitsigns.lua
+- lua/plugins/version-control/neogit.lua
+
+WRITING PLUGINS (Deleted):
+- lua/plugins/writing/helpview.lua
+- lua/plugins/writing/markdown-preview.lua
+- lua/plugins/writing/markview.lua
+- lua/plugins/writing/neorg.lua
+
+CORE FILES (Deleted):
+- lua/mappings.lua (333 lines of keymaps)
+- lua/options.lua
+- lua/core/messages.lua
+- lua/core/lazy.lua
+- lua/vscode-config.lua
+
+#### 2.1.5 New Files Added
+
+COLORSCHEME:
+- lua/plugins/colorscheme/init.lua - LazyVim colorscheme integration
+- lua/plugins/colorscheme/nvchad.lua - NvChad UI as optional plugin
+
+EDITOR:
+- lua/plugins/editor/atone.lua
+- lua/plugins/editor/diffview.lua
+- lua/plugins/editor/friendly-snippets.lua
+- lua/plugins/editor/oil.lua (new simplified version)
+- lua/plugins/editor/telescope.lua (new simplified version)
+
+LANG:
+- lua/plugins/lang/compiler.lua (new version)
+- lua/plugins/lang/easy-dotnet.lua
+- lua/plugins/lang/nvim-java.lua (new version)
+
+LSP:
+- lua/plugins/lsp/lsp-lens.lua (new version)
+- lua/plugins/lsp/nvim-lspconfig.lua (new simplified version)
+- lua/plugins/lsp/trouble.lua (new version)
+- lua/plugins/lsp/workspace-diagnostics.lua
+
+UI:
+- lua/plugins/ui/bufferline.lua
+- lua/plugins/ui/lualine.lua
+- lua/plugins/ui/snacks.lua (replaces nvim-notify)
+- lua/plugins/ui/which-key.lua (new simplified version)
+- lua/plugins/ui/numb.lua (moved from core/)
+
+UTIL:
+- lua/plugins/util/cloak.lua (moved from core/)
+- lua/plugins/util/lazydev.lua (moved from lsp/configs/)
+- lua/plugins/util/vim-suda.lua (moved from core/)
+
+ROOT:
+- stylua.toml
+- lazyvim.json
+
+#### 2.1.6 Key Configuration Pattern Changes
+
+PLUGIN SPEC PATTERN (Old):
+```lua
+---@type NvPluginSpec
+return {
+  "plugin/name",
+  event = "VeryLazy",
+  opts = {},
+  config = function(_, opts)
+    require("plugin").setup(opts)
+  end,
+}
+```
+
+PLUGIN SPEC PATTERN (New):
+```lua
+---@type LazySpec
+return {
+  "plugin/name",
+  opts = function(_, opts)
+    -- Extend LazyVim defaults
+    table.insert(opts.something, value)
+  end,
+}
+```
+
+COLORSCHEME CONDITIONAL LOADING:
+```lua
+return {
+  "plugin/name",
+  enabled = vim.g.colorscheme ~= "nvchad",
+  -- ...
+}
+```
+
+LSP CONFIG PATTERN (New):
+```lua
+return {
+  "neovim/nvim-lspconfig",
+  opts = {
+    servers = {
+      lua_ls = {},
+      tsserver = {},
+    },
+  },
+}
+```
+
+---
+
+### 2.2 Fork Customizations (To Be Preserved)
+
+#### 2.2.1 Filetype Detection Files
+Location: ftdetect/
+Files to preserve:
+- dockerfile.lua - Dockerfile filetype detection
+- terraform.lua - Terraform filetype detection
+- yaml.ansible.lua - Ansible YAML detection
+- yaml.docker-compose.lua - Docker Compose YAML detection
+- yaml.ghaction.lua - GitHub Actions YAML detection
+
+#### 2.2.2 Custom serpro69 Module
+Location: lua/serpro69/
+
+FILES AND PURPOSES:
+
+chadrc_aux.lua:
+- Custom statusline modules
+- harpoon_indicator function (shows harpoon marks in statusline)
+- pomo_timer function (shows pomodoro timer in statusline)
+- Theme settings and overrides
+
+commands.lua:
+- ObsidianFormatAIOutput command (formats AI output for Obsidian)
+- Custom user commands
+
+mappings.lua:
+- Personal keybindings
+- Buffer management shortcuts
+- NvChad menu integration
+- Custom leader key mappings
+
+notify.lua:
+- Custom LSP progress notifications with spinners
+- DAP progress notifications
+- Macro recording notifications
+- Integration with nvim-notify
+
+nvchad.lua:
+- NvChad plugin configuration overrides
+- Base46 theme settings
+- UI component customizations
+
+plugins_aux.lua:
+- AI model definitions (Gemini configurations)
+- Copilot adapter settings
+- nvim-tree keymaps for Avante integration
+- Helper functions for AI plugins
+
+options.lua:
+- Custom vim options
+- Editor behavior settings
+- Personal preferences
+
+#### 2.2.3 Plugin Customizations
+
+AI PLUGINS:
+- lua/plugins/ai/codecompanion.lua
+  - Gemini adapter configuration
+  - Copilot adapter configuration
+  - Custom chat settings
+- lua/plugins/ai/copilot.lua
+  - Extended filetype configuration
+  - Custom enable/disable patterns
+- lua/plugins/ai/copilot-cmp.lua
+  - Copilot completion source integration
+- lua/plugins/ai/supermaven.lua
+  - Supermaven AI configuration
+
+COMPLETION:
+- lua/plugins/completion/nvim-cmp.lua
+  - Copilot integration
+  - has_words_before function
+  - Custom completion sources order
+  - Snippet expansion settings
+
+CORE:
+- lua/plugins/core/better-escape.lua
+  - Custom escape mappings
+- lua/plugins/core/legendary.lua
+  - Command palette customizations
+- lua/plugins/core/nvim-treesitter.lua
+  - Added parsers: go, hcl, kotlin, make, terraform, twig, yaml
+  - Custom highlight settings
+- lua/plugins/core/which-key.lua
+  - Custom key group definitions
+
+DAP:
+- lua/plugins/dap/nvim-dap.lua
+  - Custom debug adapter configurations
+  - Breakpoint settings
+
+EDITING:
+- lua/plugins/editing/flash.lua
+  - Custom labels configuration
+  - Personal keymaps
+  - Search settings
+
+LSP:
+- lua/plugins/lsp/configs/conform.lua
+  - ktfmt formatter for Kotlin
+  - Disabled csharpier formatter
+  - Disabled markdownlint formatter
+  - Custom format-on-save settings
+- lua/plugins/lsp/configs/lsp-lens.lua
+  - Code lens customizations
+- lua/plugins/lsp/configs/lspui.lua
+  - LSP UI enhancements
+- lua/plugins/lsp/configs/mason.lua
+  - Custom setup with notification for missing settings
+  - Ensure installed packages
+- lua/plugins/lsp/configs/nvim-lint.lua
+  - Linters for: javascript, markdown, sh, typescript, yaml, kotlin
+  - Custom linter configurations
+- lua/plugins/lsp/configs/typescript-tools.lua
+  - TypeScript-specific settings
+
+LANG:
+- lua/plugins/langs/kubernetes-schema-snippets.lua
+  - Kubernetes YAML schema snippets
+- lua/plugins/langs/luasnip.lua
+  - Custom snippet configurations
+- lua/plugins/langs/nvim-java.lua
+  - Java development settings
+
+NAVIGATION:
+- lua/plugins/navigation/nvim-tree.lua
+  - Avante integration keymaps
+  - Custom on_attach function
+
+WRITING:
+- lua/plugins/writing/obsidian.lua
+  - Workspaces: evergreen, norsk
+  - Custom template settings
+- lua/plugins/writing/pomo.lua
+  - Pomodoro timer configuration
+  - Timer notifications
+
+UI:
+- lua/plugins/ui/nvim-notify.lua
+  - Custom notification settings
+  - Transparency handling
+
+#### 2.2.4 LSP Server Settings
+Location: lua/plugins/lsp/settings/
+
+SERVER CONFIGURATIONS:
+- ansiblels.lua - Ansible language server settings
+- bashls.lua - Bash language server settings
+- docker_compose_language_service.lua - Docker Compose LSP
+- dockerls.lua - Docker language server
+- kotlin_lsp.lua - Kotlin language server
+- marksman.lua - Markdown language server
+- nil.lua - Nix language server
+- terraformls.lua - Terraform language server
+- ts_ls.lua - TypeScript language server
+- yamlls.lua - YAML language server with Kubernetes schemas
+
+#### 2.2.5 Custom Theme
+Location: lua/themes/eldritch.lua
+- Custom color scheme
+- Highlight group definitions
+- UI color overrides
+
+#### 2.2.6 Custom Snippets
+Location: snippets/snipmate/go.snippets
+- Go language snippets
+- Custom code templates
+
+---
+
+## 3. Requirements
+
+### 3.1 Functional Requirements
+
+FR-1: Core Structure Migration
+- FR-1.1: Update init.lua to use LazyVim bootstrap pattern
+- FR-1.2: Create lua/config/ directory with LazyVim structure
+- FR-1.3: Migrate options from lua/serpro69/options.lua to lua/config/options.lua
+- FR-1.4: Migrate keymaps from lua/serpro69/mappings.lua to lua/config/keymaps.lua
+- FR-1.5: Create lazyvim.json with appropriate extras enabled
+
+FR-2: Plugin Migration
+- FR-2.1: Reorganize plugins into new directory structure
+- FR-2.2: Update all plugin specs from NvPluginSpec to LazySpec
+- FR-2.3: Convert plugin configurations to LazyVim extension patterns
+- FR-2.4: Preserve custom plugin settings and overrides
+
+FR-3: LSP Configuration Migration
+- FR-3.1: Migrate LSP server settings to LazyVim lspconfig pattern
+- FR-3.2: Preserve custom formatter configurations (conform.lua)
+- FR-3.3: Preserve custom linter configurations (nvim-lint.lua)
+- FR-3.4: Maintain Mason package installations
+
+FR-4: AI Integration Preservation
+- FR-4.1: Migrate Copilot configuration
+- FR-4.2: Migrate CodeCompanion with Gemini adapter
+- FR-4.3: Migrate Supermaven configuration
+- FR-4.4: Preserve AI model definitions from plugins_aux.lua
+
+FR-5: UI Component Migration
+- FR-5.1: Configure NvChad or LazyVim UI mode
+- FR-5.2: Migrate statusline customizations (harpoon_indicator, pomo_timer)
+- FR-5.3: Preserve notification system configuration
+- FR-5.4: Migrate custom theme (eldritch.lua)
+
+FR-6: Custom Module Migration
+- FR-6.1: Migrate serpro69/commands.lua functionality
+- FR-6.2: Migrate serpro69/notify.lua LSP/DAP progress notifications
+- FR-6.3: Migrate serpro69/chadrc_aux.lua statusline modules
+- FR-6.4: Migrate serpro69/plugins_aux.lua helper functions
+
+FR-7: Filetype and Snippet Migration
+- FR-7.1: Copy ftdetect/ files unchanged
+- FR-7.2: Copy custom snippets unchanged
+- FR-7.3: Verify filetype detection works correctly
+
+### 3.2 Non-Functional Requirements
+
+NFR-1: Compatibility
+- NFR-1.1: Must work with Neovim 0.11+
+- NFR-1.2: Must maintain compatibility with existing workflows
+- NFR-1.3: Should support both NvChad and LazyVim UI modes
+
+NFR-2: Performance
+- NFR-2.1: Startup time should not regress significantly
+- NFR-2.2: Plugin lazy-loading should be preserved or improved
+- NFR-2.3: LSP performance should be maintained
+
+NFR-3: Maintainability
+- NFR-3.1: Configuration should be easy to update with upstream changes
+- NFR-3.2: Custom overrides should be clearly separated from base config
+- NFR-3.3: Follow LazyVim conventions for easier future maintenance
+
+---
+
+## 4. Technical Specifications
+
+### 4.1 LazyVim Extras to Enable
+
+Required extras based on current configuration:
+
+```json
+{
+  "extras": [
+    "lazyvim.plugins.extras.ai.copilot",
+    "lazyvim.plugins.extras.coding.blink",
+    "lazyvim.plugins.extras.coding.luasnip",
+    "lazyvim.plugins.extras.dap.core",
+    "lazyvim.plugins.extras.editor.flash",
+    "lazyvim.plugins.extras.editor.harpoon2",
+    "lazyvim.plugins.extras.formatting.conform",
+    "lazyvim.plugins.extras.lang.docker",
+    "lazyvim.plugins.extras.lang.go",
+    "lazyvim.plugins.extras.lang.java",
+    "lazyvim.plugins.extras.lang.json",
+    "lazyvim.plugins.extras.lang.kotlin",
+    "lazyvim.plugins.extras.lang.markdown",
+    "lazyvim.plugins.extras.lang.nix",
+    "lazyvim.plugins.extras.lang.terraform",
+    "lazyvim.plugins.extras.lang.typescript",
+    "lazyvim.plugins.extras.lang.yaml",
+    "lazyvim.plugins.extras.linting.eslint",
+    "lazyvim.plugins.extras.test.core",
+    "lazyvim.plugins.extras.ui.treesitter-context",
+    "lazyvim.plugins.extras.util.project"
+  ]
+}
+```
+
+### 4.2 File Mapping
+
+Files to copy directly (no changes needed):
+- ftdetect/* → ftdetect/*
+- lua/themes/eldritch.lua → lua/themes/eldritch.lua
+- snippets/snipmate/go.snippets → snippets/snipmate/go.snippets
+
+Files to migrate:
+- lua/serpro69/options.lua → lua/config/options.lua (merge with LazyVim defaults)
+- lua/serpro69/mappings.lua → lua/config/keymaps.lua (merge with LazyVim defaults)
+- lua/serpro69/commands.lua → lua/config/autocmds.lua (or separate commands.lua)
+
+Plugin files to migrate to new structure:
+- lua/plugins/ai/codecompanion.lua → lua/plugins/ai/codecompanion.lua
+- lua/plugins/ai/copilot.lua → lua/plugins/ai/copilot.lua
+- lua/plugins/ai/supermaven.lua → lua/plugins/ai/supermaven.lua
+- lua/plugins/editing/flash.lua → lua/plugins/editor/flash.lua
+- lua/plugins/lsp/configs/conform.lua → lua/plugins/lsp/conform.lua
+- lua/plugins/lsp/configs/nvim-lint.lua → lua/plugins/lsp/nvim-lint.lua
+- lua/plugins/writing/obsidian.lua → lua/plugins/lang/obsidian.lua
+- lua/plugins/writing/pomo.lua → lua/plugins/util/pomo.lua
+- lua/plugins/navigation/nvim-tree.lua → lua/plugins/editor/nvim-tree.lua
+
+LSP settings migration:
+- lua/plugins/lsp/settings/*.lua → Inline in lua/plugins/lsp/nvim-lspconfig.lua opts.servers
+
+### 4.3 UI Mode Decision
+
+OPTION A: Keep NvChad UI
+- Set vim.g.colorscheme = "nvchad" in options
+- Keep lua/chadrc.lua configuration
+- Statusline customizations (harpoon_indicator, pomo_timer) continue to work
+- Use base46 themes including custom eldritch.lua
+
+OPTION B: Use LazyVim Default UI (lualine/bufferline)
+- Set vim.g.colorscheme to a standard colorscheme
+- Migrate statusline customizations to lualine components
+- Use standard theme system
+- Simpler long-term maintenance
+
+Recommendation: Start with Option A to minimize initial migration complexity, then optionally migrate to Option B later.
+
+---
+
+## 5. Migration Phases
+
+### Phase 1: Preparation (Priority: Critical)
+Tasks:
+1.1 Create migration branch
+1.2 Backup current configuration
+1.3 Document current keybindings for reference
+1.4 Test current configuration to establish baseline
+
+### Phase 2: Core Structure (Priority: Critical)
+Tasks:
+2.1 Update init.lua with LazyVim bootstrap
+2.2 Create lua/config/lazy.lua
+2.3 Create lua/config/options.lua (merge serpro69/options.lua)
+2.4 Create lua/config/keymaps.lua (merge serpro69/mappings.lua)
+2.5 Create lua/config/autocmds.lua
+2.6 Create lazyvim.json with extras
+
+### Phase 3: Colorscheme and UI (Priority: High)
+Tasks:
+3.1 Create lua/plugins/colorscheme/nvchad.lua (if using NvChad UI)
+3.2 Migrate lua/themes/eldritch.lua
+3.3 Migrate statusline customizations
+3.4 Configure notification system (Snacks.nvim or nvim-notify)
+
+### Phase 4: LSP Migration (Priority: High)
+Tasks:
+4.1 Create lua/plugins/lsp/nvim-lspconfig.lua with server settings
+4.2 Migrate conform.lua formatter settings
+4.3 Migrate nvim-lint.lua linter settings
+4.4 Migrate Mason configuration
+4.5 Test LSP functionality for each language
+
+### Phase 5: Plugin Migration (Priority: High)
+Tasks:
+5.1 Migrate AI plugins (copilot, codecompanion, supermaven)
+5.2 Migrate editor plugins (flash, treesitter additions)
+5.3 Migrate navigation plugins (nvim-tree with Avante integration)
+5.4 Migrate writing plugins (obsidian, pomo)
+5.5 Migrate completion customizations
+
+### Phase 6: Custom Module Migration (Priority: Medium)
+Tasks:
+6.1 Migrate serpro69/notify.lua (LSP/DAP progress)
+6.2 Migrate serpro69/chadrc_aux.lua (statusline modules)
+6.3 Migrate serpro69/plugins_aux.lua (AI helpers)
+6.4 Migrate serpro69/commands.lua
+
+### Phase 7: Testing and Verification (Priority: Critical)
+Tasks:
+7.1 Test LSP for each configured language
+7.2 Test DAP debugging functionality
+7.3 Test AI integrations (Copilot, CodeCompanion, Supermaven)
+7.4 Test completion system
+7.5 Test navigation (Telescope, Flash, nvim-tree)
+7.6 Test git integration
+7.7 Verify all keybindings work correctly
+7.8 Performance testing (startup time)
+
+### Phase 8: Cleanup (Priority: Low)
+Tasks:
+8.1 Remove obsolete files
+8.2 Update documentation (CLAUDE.md, README.md)
+8.3 Clean up lazy-lock.json
+8.4 Final code formatting with stylua
+
+---
+
+## 6. Risk Assessment
+
+### High Risk
+- LSP configuration changes may break language support
+- Keybinding conflicts between LazyVim defaults and custom mappings
+- Plugin compatibility issues with new lazy.nvim patterns
+
+### Medium Risk
+- Statusline customizations may not work with LazyVim UI
+- AI plugin configurations may need significant updates
+- Some plugins may be deprecated or replaced in LazyVim
+
+### Low Risk
+- Filetype detection should work unchanged
+- Custom snippets should work unchanged
+- Theme files may need minor adjustments
+
+### Mitigation Strategies
+1. Test each phase independently before proceeding
+2. Keep backup of working configuration
+3. Use git branches for easy rollback
+4. Document all changes made during migration
+5. Test with real projects to verify functionality
+
+---
+
+## 7. Success Criteria
+
+### Must Have
+- All LSP servers functional for configured languages
+- All keybindings working (custom and LazyVim defaults)
+- AI integrations operational (Copilot, CodeCompanion)
+- DAP debugging functional
+- Completion system working with all sources
+- No startup errors or warnings
+
+### Should Have
+- Startup time within 10% of original
+- All custom statusline modules working
+- Notification system functional
+- Git integration working
+
+### Nice to Have
+- Clean separation of custom vs base config
+- Easy to update from upstream
+- Documentation updated
+
+---
+
+## 8. Dependencies
+
+### External Dependencies
+- Neovim 0.11+
+- lazy.nvim (plugin manager)
+- LazyVim (configuration framework)
+- Mason (LSP/DAP installer)
+- Various language servers and tools
+
+### Internal Dependencies
+- Phase 2 must complete before Phase 3-6
+- Phase 4 (LSP) should complete before Phase 5 (plugins)
+- All phases must complete before Phase 7 (testing)
+
+---
+
+## 9. Glossary
+
+- **NvChad**: Neovim configuration framework with custom UI components
+- **LazyVim**: Neovim configuration framework with plugin abstractions
+- **lazy.nvim**: Plugin manager for Neovim
+- **LSP**: Language Server Protocol
+- **DAP**: Debug Adapter Protocol
+- **Mason**: Tool installer for LSP servers, formatters, linters
+- **Extras**: LazyVim modular plugin configurations
+- **base46**: NvChad theming system
+
+---
+
+## 10. Appendices
+
+### Appendix A: Current serpro69 Module Files Content Summary
+
+See sections 2.2.2-2.2.4 for detailed file contents analysis.
+
+### Appendix B: Complete List of Deleted Upstream Files
+
+See section 2.1.4 for complete list.
+
+### Appendix C: Complete List of New Upstream Files
+
+See section 2.1.5 for complete list.
+
+### Appendix D: LSP Server Settings Summary
+
+| Server | Language | Key Settings |
+|--------|----------|--------------|
+| ansiblels | Ansible | Ansible-specific settings |
+| bashls | Bash/Shell | Shell script settings |
+| docker_compose_language_service | Docker Compose | Compose file settings |
+| dockerls | Dockerfile | Dockerfile settings |
+| kotlin_lsp | Kotlin | Kotlin development |
+| marksman | Markdown | Markdown navigation |
+| nil | Nix | Nix language support |
+| terraformls | Terraform | Terraform/HCL support |
+| ts_ls | TypeScript | TypeScript development |
+| yamlls | YAML | Kubernetes schemas included |
+
+### Appendix E: Custom Keybinding Categories
+
+Categories of custom keybindings to preserve:
+- Buffer management
+- Window navigation
+- LSP actions
+- DAP debugging
+- Git operations
+- AI integrations
+- File navigation
+- Search and replace
+- Terminal operations

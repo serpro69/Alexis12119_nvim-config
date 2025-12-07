@@ -2,341 +2,771 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
-        "title": "Create Language Skill Directory Structure and Base Templates",
-        "description": "Set up the foundational directory structure for all 5 language skills (Go, Python, Java, Kotlin, TypeScript) with consistent file templates and framework extension support",
-        "status": "pending",
-        "dependencies": [],
+        "id": 6,
+        "title": "Create LazyVim Bootstrap and Core Configuration Structure",
+        "description": "Set up the new init.lua with LazyVim bootstrap pattern and create the lua/config/ directory structure with lazy.lua, options.lua, keymaps.lua, and autocmds.lua files.",
+        "details": "## Implementation Steps\n\n### 1. Update init.lua with LazyVim bootstrap pattern\n\nReplace current init.lua content with LazyVim bootstrap:\n\n```lua\n-- Bootstrap lazy.nvim and LazyVim\nlocal lazypath = vim.fn.stdpath(\"data\") .. \"/lazy/lazy.nvim\"\nif not (vim.uv or vim.loop).fs_stat(lazypath) then\n  local lazyrepo = \"https://github.com/folke/lazy.nvim.git\"\n  local out = vim.fn.system({ \"git\", \"clone\", \"--filter=blob:none\", \"--branch=stable\", lazyrepo, lazypath })\n  if vim.v.shell_error ~= 0 then\n    vim.api.nvim_echo({ { \"Failed to clone lazy.nvim:\\n\", \"ErrorMsg\" }, { out, \"WarningMsg\" } }, true, {})\n  end\nend\nvim.opt.rtp:prepend(lazypath)\n\n-- LazyVim global options\nvim.g.mapleader = \" \"\nvim.g.maplocalleader = \"\\\\\"\nvim.g.colorscheme = \"nvchad\" -- Keep NvChad UI mode initially\n\nrequire(\"lazy\").setup({\n  spec = {\n    { \"LazyVim/LazyVim\", import = \"lazyvim.plugins\" },\n    { import = \"lazyvim.plugins.extras.coding.blink\" },\n    -- Import enabled extras from lazyvim.json\n    { import = \"plugins\" },\n  },\n  defaults = { lazy = true },\n  install = { colorscheme = { \"tokyonight\", \"haiku\" } },\n  checker = { enabled = not vim.g.is_windows },\n  performance = {\n    rtp = {\n      disabled_plugins = {\n        \"gzip\", \"tarPlugin\", \"tohtml\", \"tutor\", \"zipPlugin\",\n      },\n    },\n  },\n})\n```\n\n### 2. Create lua/config/ directory structure\n\nCreate the following files:\n\n**lua/config/lazy.lua** - LazyVim specific lazy.nvim configuration (merged from lua/core/lazy.lua)\n\n**lua/config/options.lua** - Merge options from:\n- lua/options.lua (base NvChad options)\n- lua/serpro69/options.lua (custom options)\n- Add LazyVim-specific globals (vim.g.lazyvim_picker, vim.g.lazyvim_cmp, etc.)\n\n**lua/config/keymaps.lua** - Merge keymaps from:\n- lua/mappings.lua (base keymaps - ~334 lines)\n- lua/serpro69/mappings.lua (custom keymaps - ~65 lines)\n- Convert from NvChad tabufline navigation to LazyVim buffer navigation\n\n**lua/config/autocmds.lua** - Merge autocmds from:\n- lua/core/autocommands.lua\n- lua/core/serpro69/autocommands.lua\n\n### 3. Create lazyvim.json for extras\n\n```json\n{\n  \"extras\": [\n    \"lazyvim.plugins.extras.ai.copilot\",\n    \"lazyvim.plugins.extras.coding.blink\",\n    \"lazyvim.plugins.extras.coding.luasnip\",\n    \"lazyvim.plugins.extras.dap.core\",\n    \"lazyvim.plugins.extras.editor.flash\",\n    \"lazyvim.plugins.extras.editor.harpoon2\",\n    \"lazyvim.plugins.extras.formatting.conform\",\n    \"lazyvim.plugins.extras.lang.docker\",\n    \"lazyvim.plugins.extras.lang.go\",\n    \"lazyvim.plugins.extras.lang.java\",\n    \"lazyvim.plugins.extras.lang.json\",\n    \"lazyvim.plugins.extras.lang.kotlin\",\n    \"lazyvim.plugins.extras.lang.markdown\",\n    \"lazyvim.plugins.extras.lang.nix\",\n    \"lazyvim.plugins.extras.lang.terraform\",\n    \"lazyvim.plugins.extras.lang.typescript\",\n    \"lazyvim.plugins.extras.lang.yaml\",\n    \"lazyvim.plugins.extras.linting.eslint\",\n    \"lazyvim.plugins.extras.test.core\",\n    \"lazyvim.plugins.extras.ui.treesitter-context\",\n    \"lazyvim.plugins.extras.util.project\"\n  ],\n  \"news\": {\n    \"lazyvim\": \"12\"\n  },\n  \"version\": 7\n}\n```\n\n### Key Considerations\n- Preserve vim.g.is_windows detection\n- Keep VSCode conditional loading if needed\n- Maintain vim.version() >= 11 compatibility hack\n- Update type annotations from NvPluginSpec to LazySpec",
+        "testStrategy": "1. Run `nvim --headless +qa` to verify no startup errors\n2. Check `:checkhealth lazy` for plugin manager status\n3. Verify `:Lazy` UI opens correctly\n4. Test basic navigation keymaps (window switching, buffer navigation)\n5. Confirm startup time with `:Lazy profile`\n6. Test that options are applied correctly (`:set number?`, `:set relativenumber?`)",
         "priority": "high",
-        "details": "Create the base directory structure under .claude/skills/ for each language skill following the naming convention lang-<language>. Each skill directory must contain: SKILL.md (entry point with navigation), style.md, testing.md, tooling.md, patterns.md, and frameworks/ subdirectory with README.md and .gitkeep. Use a consistent markdown template structure across all files. The SKILL.md template should include frontmatter with name and description fields, followed by sections for overview, quick reference, topic links, and usage scenarios. Topic files should have placeholder sections ready for content population. The frameworks/README.md should provide clear instructions for adding framework-specific guides with a template structure example.\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 1, Tasks 1.1-1.4)",
-        "testStrategy": "Verify all 5 language skill directories exist with correct structure using filesystem assertions. Validate that each SKILL.md contains proper frontmatter and required sections. Ensure all markdown files have valid syntax and working relative links between files. Test that frameworks/ directories contain both README.md and .gitkeep files. Use a schema validator to ensure consistent structure across all language skills.",
+        "dependencies": [],
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Create base directory structure for all 5 language skills",
-            "description": "Create the foundational directory structure under .claude/skills/ for Go, Python, Java, Kotlin, and TypeScript language skills following the lang-<language> naming convention",
+            "title": "Create lua/config/ directory and update init.lua with LazyVim bootstrap",
+            "description": "Create the lua/config/ directory structure and replace init.lua with LazyVim bootstrap pattern, preserving VSCode conditional, Windows detection, and vim.version() >= 11 compatibility hack.",
             "dependencies": [],
-            "details": "Create 5 directories: .claude/skills/lang-go/, .claude/skills/lang-python/, .claude/skills/lang-java/, .claude/skills/lang-kotlin/, and .claude/skills/lang-typescript/. Each directory must contain the exact same file structure: SKILL.md, style.md, testing.md, tooling.md, patterns.md, and a frameworks/ subdirectory. Create frameworks/README.md and frameworks/.gitkeep files in each language skill directory to ensure proper git tracking and provide framework extension instructions.",
+            "details": "1. Create lua/config/ directory if it doesn't exist\n2. Replace init.lua content with LazyVim bootstrap pattern:\n   - Keep VSCode conditional check at the top (lines 1-4 of current init.lua)\n   - Add lazy.nvim bootstrap using (vim.uv or vim.loop).fs_stat pattern\n   - Set vim.g.mapleader and vim.g.maplocalleader before lazy setup\n   - Preserve vim.g.colorscheme = 'nvchad' for NvChad UI mode\n   - Keep vim.tbl_add_reverse_lookup compatibility hack for vim.version().minor >= 11\n   - Configure lazy.setup with LazyVim spec import, plugins import, and performance settings\n   - Load config files after lazy setup: require('config.options'), require('config.keymaps'), require('config.autocmds')\n3. Maintain existing dofile for base46_cache highlights when nvchad colorscheme is active",
             "status": "pending",
-            "testStrategy": "Verify all 5 language skill directories exist at .claude/skills/lang-{go,python,java,kotlin,typescript}/. Check that each directory contains exactly 5 markdown files and 1 frameworks subdirectory. Validate frameworks/ contains both README.md and .gitkeep files."
+            "testStrategy": "Run `nvim --headless +qa` to verify no startup errors. Check `:Lazy` opens correctly. Verify lazy.nvim loads and displays plugin manager UI."
           },
           {
             "id": 2,
-            "title": "Implement SKILL.md entry point templates for each language",
-            "description": "Create standardized SKILL.md files with proper frontmatter and navigation structure for all 5 language skills",
+            "title": "Create lua/config/lazy.lua with LazyVim-specific configuration",
+            "description": "Merge lua/core/lazy.lua options into lua/config/lazy.lua, adding LazyVim-specific settings while preserving existing disabled_plugins list and UI customizations.",
             "dependencies": [
               1
             ],
-            "details": "For each language skill directory, create SKILL.md with YAML frontmatter containing name field (lang-<language>) and description field following the pattern 'Use when working with <Language> codebases to get guidance on <Language>-specific style conventions, testing strategies, tooling, and best practices'. Include sections: language philosophy/overview (10-15 lines), Quick Reference with essential commands, Topics section with markdown links to all topic files (style.md, testing.md, tooling.md, patterns.md, frameworks/README.md), and When to Use This Skill section with specific invocation scenarios. Ensure consistent formatting and relative link paths.",
+            "details": "1. Create lua/config/lazy.lua as LazyVim lazy.nvim configuration\n2. Migrate settings from lua/core/lazy.lua (59 lines):\n   - defaults = { lazy = true }\n   - checker = { enabled = not vim.g.is_windows }\n   - change_detection settings\n   - lockfile path\n   - diff cmd = 'diffview.nvim'\n   - UI settings with border and icons\n   - performance.rtp.disabled_plugins list (preserve all ~20 disabled plugins)\n3. Add LazyVim-specific settings:\n   - install.colorscheme = { 'tokyonight', 'haiku' } (fallback for non-nvchad mode)\n4. This file will be required by init.lua as the second argument to require('lazy').setup()",
             "status": "pending",
-            "testStrategy": "Parse each SKILL.md to verify YAML frontmatter contains required name and description fields. Check that all 5 required sections are present. Validate all internal markdown links resolve correctly to topic files. Ensure file meets 50-100 line requirement."
+            "testStrategy": "Run `:checkhealth lazy` to verify plugin manager status. Confirm startup time with `:Lazy profile`. Check disabled_plugins are properly excluded."
           },
           {
             "id": 3,
-            "title": "Create topic file templates with placeholder content",
-            "description": "Generate consistent template structure for style.md, testing.md, tooling.md, and patterns.md files across all languages",
+            "title": "Create lua/config/options.lua by merging NvChad and custom options",
+            "description": "Merge lua/options.lua (base NvChad options - 57 lines) and lua/serpro69/options.lua (custom options - 10 lines) into lua/config/options.lua with LazyVim-specific globals.",
             "dependencies": [
               1
             ],
-            "details": "For each of the 4 topic files (style.md, testing.md, tooling.md, patterns.md) in all 5 language directories, create a consistent markdown template with: H1 header '<Language> <Topic Name>', Overview section with placeholder text explaining the topic's purpose, multiple H2 sections for subtopics (minimum 4-5 per file), placeholder content with TODO markers for later population, consistent section naming across languages (e.g., all style.md files have 'Naming Conventions', 'Code Formatting', 'Project Structure' sections). Each file should be 30-50 lines with clear structure ready for content addition. Include code block placeholders with appropriate language syntax highlighting.",
+            "details": "1. Create lua/config/options.lua\n2. Import globals from lua/core/globals.lua (34 lines):\n   - vim.g.is_windows, vim.g.os, vim.g.path_delimiter, vim.g.path_separator\n   - vim.g.mapleader = ' ', vim.g.maplocalleader = '\\\\'\n   - vim.g.base46_cache path\n   - Provider disables (node, python3, perl, ruby)\n   - vim.g.toggle_cmp, vim.g.toggle_blink, vim.g.border_enabled\n3. Import custom globals from lua/core/serpro69/globals.lua (vim.g.disable_autoformat)\n4. Merge all options from lua/options.lua:\n   - laststatus, backup, conceallevel, fileencoding, hidden, ignorecase, mouse\n   - pumheight, pumblend, showmode, smartcase, smartindent, splitbelow/right/keep\n   - swapfile, timeoutlen, undofile, updatetime, writebackup\n   - expandtab, shiftwidth, tabstop, cursorline, number, relativenumber\n   - numberwidth, signcolumn, wrap, lazyredraw, termguicolors, fillchars\n   - ruler, cmdheight, helpheight, sessionoptions\n5. Add vim.opt.shortmess:append 'Acq' (merged from both files)\n6. Add LazyVim globals: vim.g.lazyvim_picker = 'telescope', vim.g.lazyvim_cmp = 'blink.cmp'",
             "status": "pending",
-            "testStrategy": "Verify each topic file exists in all 5 language directories (20 files total). Check that each file has proper H1 header and at least 4 H2 sections. Validate TODO markers are present for content population. Ensure consistent section structure across same topic files."
+            "testStrategy": "Verify options applied: check vim.o.laststatus == 3, vim.o.number == true, vim.g.mapleader == ' '. Test vim.g.is_windows detection on Linux returns false."
           },
           {
             "id": 4,
-            "title": "Create framework extension templates and documentation",
-            "description": "Set up frameworks/ subdirectories with README.md templates explaining how to add framework-specific guides",
+            "title": "Create lua/config/keymaps.lua by merging base and custom keymaps",
+            "description": "Merge lua/mappings.lua (334 lines of base keymaps) and lua/serpro69/mappings.lua (65 lines of custom keymaps) into lua/config/keymaps.lua, converting NvChad tabufline navigation to buffer-local keymaps.",
             "dependencies": [
               1
             ],
-            "details": "In each language's frameworks/ directory, create README.md with: H1 'Framework-Specific Guides for <Language>', explanation of the framework extension system, template structure for adding new framework guides (frontmatter format, required sections, file naming conventions like 'framework-<name>.md'), example framework guide structure showing sections like 'Setup', 'Core Concepts', 'Testing Approach', 'Common Patterns', instructions for when to add framework guides vs keeping content in core files, list of potential frameworks for each language (e.g., React/Next.js for TypeScript, Django/FastAPI for Python). Include .gitkeep file to ensure directory tracking. Each README.md should be 50-75 lines with clear, actionable instructions.",
+            "details": "1. Create lua/config/keymaps.lua\n2. Migrate keymaps from lua/mappings.lua:\n   - General keymaps: <leader>nS (SudaWrite), <leader>R, <leader>y, <leader>q\n   - Toggle keymaps: <leader>ob (tabufline), <leader>os (statusline), <leader>ol/or (line numbers), <leader>oS (spell), <leader>ot (theme), <leader>oT (transparency), <leader>ow (wrap)\n   - Navigation: j/k with gj/gk, <C-hjkl> window movement, <C-Arrow> resize\n   - Buffer/Tab: H/L for prev/next buffer (convert from nvchad.tabufline to :bprev/:bnext), Arrow keys for tabs\n   - Editing: </> indent, <A-j>/<A-k> line movement, visual mode mappings\n   - Terminal: <Esc>, <C-hjkl>\n   - Telescope: <leader>nf, <leader>ng for config files\n   - NvChad: <leader>nc (cheatsheet), <leader>ni (inspect), <leader>nm/nh/nv\n   - Lazy: <leader>pc/pC/pd/pi/ps/pl/ph/pH/pp/pu\n3. Migrate lua/serpro69/mappings.lua:\n   - jj/jk exit insert, <C-s> save, <Esc> clear highlights\n   - <leader>bc close buffer, <leader>bd close all but current\n   - <leader>ont theme selector, <leader>onm menu, <RightMouse> context menu\n4. Convert H/L buffer navigation from require('nvchad.tabufline').prev/next to standard :bprev/:bnext or LazyVim buffer functions",
             "status": "pending",
-            "testStrategy": "Verify frameworks/README.md exists in all 5 language directories. Check for presence of .gitkeep files. Validate that README contains template structure example and clear instructions. Ensure framework naming conventions are documented. Test that markdown syntax is valid."
+            "testStrategy": "Test basic navigation: H/L cycle buffers, <C-hjkl> switch windows, j/k work with count. Test toggle keymaps: <leader>ol toggles line numbers. Test <leader>q quits Neovim."
           },
           {
             "id": 5,
-            "title": "Validate complete directory structure and file consistency",
-            "description": "Perform comprehensive validation of the entire language skills directory structure ensuring all files are created with correct naming and organization",
+            "title": "Create lua/config/autocmds.lua and lazyvim.json extras configuration",
+            "description": "Merge lua/core/autocommands.lua (245 lines) and lua/core/serpro69/autocommands.lua (80 lines) into lua/config/autocmds.lua, and create lazyvim.json for LazyVim extras.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Create lua/config/autocmds.lua\n2. Migrate autocmds from lua/core/autocommands.lua:\n   - VimEnter: Open Telescope for directories\n   - User TelescopePreviewerLoaded: Enable line numbers\n   - FileType sagaoutline/nvcheatsheet: Disable fold/statuscolumn\n   - BufReadPost/BufNewFile: Lazy load clipboard\n   - TermOpen: Terminal options\n   - BufReadPost: Go to last cursor position\n   - TextYankPost: Highlight on yank (with vim.version() check)\n   - FileType *: Disable new line comment\n   - FileType c/cpp/py/java/cs: Set shiftwidth = 4\n   - FileChangedRO: Disable readonly message\n   - FocusLost/BufLeave/BufWinLeave/InsertLeave: Auto save\n   - FileChangedShellPost: Notify file reload\n   - VimResized: Equalize splits\n   - ModeChanged: Toggle hlsearch\n   - FileType gitcommit/markdown/text/log: Enable wrap/spell\n   - Overseer FileType: Options\n   - Timer-based file reload (VimEnter/VimLeave)\n3. Migrate lua/core/serpro69/autocommands.lua:\n   - BufRead/BufNewFile mkdocs.yml: Disable diagnostics\n   - FileType NvMenu: Fix z-index\n   - BufWritePre *.go: Organize imports\n   - RecordingEnter/Leave: Macro notifications\n4. Create lazyvim.json in project root with extras:\n   - ai.copilot, coding.blink, coding.luasnip, dap.core\n   - editor.flash, editor.harpoon2, formatting.conform\n   - lang.docker/go/java/json/kotlin/markdown/nix/terraform/typescript/yaml\n   - linting.eslint, test.core, ui.treesitter-context, util.project",
+            "status": "pending",
+            "testStrategy": "Test autocmds: open a directory and verify Telescope launches. Yank text and confirm highlight. Open terminal and verify insert mode starts. Create lazyvim.json and verify `:LazyExtras` shows enabled extras."
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Migrate NvChad UI Components as Optional Colorscheme Plugin",
+        "description": "Configure NvChad as an optional plugin that provides statusline, tabufline, and base46 themes when vim.g.colorscheme is set to 'nvchad', preserving the custom statusline modules (harpoon_indicator, pomo_timer).",
+        "details": "## Implementation Steps\n\n### 1. Create lua/plugins/colorscheme/nvchad.lua\n\n```lua\n---@type LazySpec\nreturn {\n  {\n    \"NvChad/NvChad\",\n    enabled = vim.g.colorscheme == \"nvchad\",\n    lazy = false,\n    branch = \"v2.5\",\n    import = \"nvchad.plugins\",\n    config = function()\n      require(\"options\") -- Load NvChad default options\n    end,\n  },\n  { \"nvzone/volt\", enabled = vim.g.colorscheme == \"nvchad\" },\n  { \"nvzone/minty\", enabled = vim.g.colorscheme == \"nvchad\" },\n  -- Disable LazyVim UI components when using NvChad\n  { \"nvim-lualine/lualine.nvim\", enabled = vim.g.colorscheme ~= \"nvchad\" },\n  { \"akinsho/bufferline.nvim\", enabled = vim.g.colorscheme ~= \"nvchad\" },\n}\n```\n\n### 2. Migrate chadrc.lua to new location\n\nKeep lua/chadrc.lua with existing configuration but update requires:\n- Keep statusline modules from serpro69/chadrc_aux.lua\n- Keep harpoon_indicator function\n- Keep pomo_timer function\n- Keep theme_toggle and custom highlight overrides\n- Keep Mason packages list\n\n### 3. Migrate custom themes\n\nCopy lua/themes/eldritch.lua and lua/themes/github_dark_dimmed.lua unchanged.\nThese work with NvChad's base46 theming system.\n\n### 4. Update serpro69/chadrc_aux.lua\n\nKeep this file as-is since it provides:\n- themes_customs with highlight overrides\n- base46_overrides for theme configuration\n- Custom statusline modules (harpoon_statusline_indicator, filename, git_custom, modified, bufnr, pomo_timer)\n- statusline and tabufline helper objects\n\n### 5. Create LazyVim colorscheme fallback\n\n```lua\n-- lua/plugins/colorscheme/init.lua\n---@type LazySpec\nreturn {\n  {\n    \"folke/tokyonight.nvim\",\n    enabled = vim.g.colorscheme ~= \"nvchad\",\n    lazy = false,\n    priority = 1000,\n    opts = {},\n  },\n}\n```\n\n### Key Files to Preserve\n- lua/serpro69/chadrc_aux.lua (statusline customizations)\n- lua/chadrc.lua (NvChad configuration)\n- lua/themes/*.lua (custom color schemes)\n- lua/highlights.lua (highlight overrides)\n- lua/core/statusline/ (statusline modules)\n- lua/core/tabufline/ (tabufline modules)",
+        "testStrategy": "1. Start Neovim with `vim.g.colorscheme = 'nvchad'` and verify NvChad UI loads\n2. Check statusline shows correctly with all custom modules\n3. Verify harpoon_indicator shows marks in statusline\n4. Test pomo_timer integration by running `:TimerStart 1m`\n5. Test theme toggle with `<leader>ot`\n6. Verify tabufline buffer navigation with H/L keys\n7. Test with `vim.g.colorscheme ~= 'nvchad'` to ensure lualine/bufferline loads instead",
+        "priority": "high",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create lua/plugins/colorscheme directory and nvchad.lua plugin spec",
+            "description": "Create the new directory structure and main NvChad plugin specification file that enables NvChad based on vim.g.colorscheme setting",
+            "dependencies": [],
+            "details": "Create lua/plugins/colorscheme/nvchad.lua with LazySpec that conditionally loads NvChad/NvChad (branch v2.5), nvzone/volt, and nvzone/minty based on vim.g.colorscheme == 'nvchad'. The spec should import nvchad.plugins and configure options loading. Also add conditional disabling of LazyVim alternatives (lualine.nvim, bufferline.nvim) when NvChad UI is active. Reference existing lua/serpro69/nvchad.lua and lua/plugins/override/ui.lua for current setup patterns.",
+            "status": "pending",
+            "testStrategy": "Start Neovim with vim.g.colorscheme = 'nvchad' in init.lua before plugin loading. Verify :Lazy shows NvChad plugins loaded. Confirm volt and minty are available. Test with colorscheme != 'nvchad' to ensure NvChad plugins are not loaded."
+          },
+          {
+            "id": 2,
+            "title": "Migrate and update chadrc.lua for conditional loading",
+            "description": "Update lua/chadrc.lua to work as NvChad configuration when colorscheme is set to 'nvchad', preserving all existing statusline order, modules, tabufline settings, and base46 theme configurations",
+            "dependencies": [
+              1
+            ],
+            "details": "Keep lua/chadrc.lua with existing M.ui (telescope style, cmp settings, statusline order including pomo_timer module, tabufline enabled), M.nvdash configuration, M.cheatsheet, M.mason packages, M.lsp signature setting, and M.base46 (theme github_dark_dimmed, theme_toggle, hl_override, hl_add, integrations). Ensure the file properly requires 'highlights', 'core.statusline.headers', 'serpro69.chadrc_aux' for themes_customs and base46_overrides. The file should only be loaded when NvChad UI is enabled. M.colorify settings should also be preserved.",
+            "status": "pending",
+            "testStrategy": "With vim.g.colorscheme = 'nvchad', verify :lua print(vim.inspect(require('chadrc'))) shows all configurations. Test statusline order shows correct modules. Verify theme_toggle with <leader>ot switches between github_dark_dimmed and sunrise_breeze."
+          },
+          {
+            "id": 3,
+            "title": "Preserve custom statusline modules in serpro69/chadrc_aux.lua",
+            "description": "Ensure lua/serpro69/chadrc_aux.lua remains intact with all custom statusline modules (harpoon_statusline_indicator, pomo_timer, git_custom, filename, modified, bufnr) and theme customizations",
+            "dependencies": [
+              1
+            ],
+            "details": "Keep lua/serpro69/chadrc_aux.lua with M.themes_customs (bearded-arc, eldritch highlight overrides), M.base46_overrides (theme: eldritch, theme_toggle), and M.modules containing: harpoon_statusline_indicator (shows harpoon marks with qwerty indicators, St_HarpoonInactive/St_HarpoonActive highlights), stbufnr helper, filename (with devicons), git_custom (colored add/change/remove counts), modified indicator, bufnr display, and pomo_timer (integrates with pomo.nvim). Also preserve M.statusline and M.tabufline helper objects.",
+            "status": "pending",
+            "testStrategy": "Add file to harpoon list, verify statusline shows mark indicator (q,w,e,r,t,y). Start pomo timer with :TimerStart 1m, verify countdown appears in statusline. Make git changes, verify git_custom shows colored counts. Modify buffer, verify * indicator appears."
+          },
+          {
+            "id": 4,
+            "title": "Migrate custom base46 themes to colorscheme directory",
+            "description": "Copy lua/themes/eldritch.lua and lua/themes/github_dark_dimmed.lua to work with the new colorscheme structure while maintaining NvChad base46 compatibility",
+            "dependencies": [
+              1
+            ],
+            "details": "Keep lua/themes/eldritch.lua with base_30 colors (including custom magenta3, lavender, dark_lavender), base_16 scheme, and polish_hl overrides for defaults, cmp, blankline, neogit, tbline, and treesitter. Keep lua/themes/github_dark_dimmed.lua with base_30, base_16, extras (light_blue, diff colors), and extensive polish_hl for defaults, treesitter (Python, Java, JavaScript, TypeScript, JSX, TSX, HTML, CSS, JSON, YAML, C#, Go, Rust, Markdown, PHP, Dart, and LSP semantic highlights). Both files must return tables compatible with NvChad's base46 theming system.",
+            "status": "pending",
+            "testStrategy": "Switch to eldritch theme, verify custom colors apply (purple borders, green keywords). Switch to github_dark_dimmed, verify language-specific treesitter highlights work (open Python file, check keyword colors). Test diff highlights in diffview."
+          },
+          {
+            "id": 5,
+            "title": "Create LazyVim colorscheme fallback and update init.lua",
+            "description": "Create lua/plugins/colorscheme/init.lua with fallback colorscheme for non-NvChad mode and update init.lua to conditionally load NvChad-specific configurations based on vim.g.colorscheme",
             "dependencies": [
               1,
               2,
               3,
               4
             ],
-            "details": "Run validation checks to ensure: all 5 language directories exist under .claude/skills/ with correct lang-<language> naming, each directory contains exactly 5 markdown files (SKILL.md, style.md, testing.md, tooling.md, patterns.md), frameworks/ subdirectory exists with README.md and .gitkeep, all markdown files have valid syntax without broken internal links, SKILL.md files contain proper frontmatter and all required sections, topic files follow consistent template structure, file permissions are correct for git tracking. Create a validation script or checklist documenting the complete structure. Fix any inconsistencies found during validation.",
+            "details": "Create lua/plugins/colorscheme/init.lua that loads a fallback colorscheme (e.g., tokyonight.nvim or catppuccin) when vim.g.colorscheme != 'nvchad'. Update init.lua to conditionally import serpro69.nvchad only when vim.g.colorscheme == 'nvchad', conditionally load base46_cache files, conditionally require nvchad.autocmds. Keep existing highlight loading, core modules, and serpro69 customizations. The init.lua currently loads lua/serpro69/nvchad.lua via { import = \"serpro69.nvchad\" } which should be conditional.",
             "status": "pending",
-            "testStrategy": "Execute filesystem checks for all 35 expected files (7 files × 5 languages). Parse all markdown files for syntax validity. Verify internal link consistency. Check git status to ensure all files are tracked. Run markdown linter on all files."
+            "testStrategy": "Start with vim.g.colorscheme = 'nvchad', verify full NvChad UI loads with statusline/tabufline. Start with vim.g.colorscheme = 'tokyonight', verify fallback theme loads, no NvChad UI components appear, lualine/bufferline would load if configured. Test switching between modes requires restart."
           }
         ]
       },
       {
-        "id": 2,
-        "title": "Implement Language-Specific Content for All Skills",
-        "description": "Research and write comprehensive, practical content for each language skill covering style conventions, testing strategies, tooling ecosystem, and design patterns",
-        "status": "pending",
-        "dependencies": [
-          1
-        ],
+        "id": 8,
+        "title": "Reorganize Plugin Directory Structure",
+        "description": "Restructure lua/plugins/ from NvChad category organization to LazyVim-compatible structure (colorscheme/, editor/, lang/, lsp/, ui/, util/, ai/, dap/).",
+        "details": "## Directory Mapping\n\n### Old → New Structure\n\n```\nlua/plugins/\n├── ai/                   → ai/ (keep)\n├── completion/           → DELETE (LazyVim handles via blink.cmp extra)\n├── core/                 → split to ui/, util/, editor/\n│   ├── better-escape.lua → editor/better-escape.lua\n│   ├── legendary.lua     → util/legendary.lua\n│   ├── nvim-treesitter.lua → DELETE (LazyVim extra)\n│   ├── which-key.lua     → ui/which-key.lua (extend LazyVim defaults)\n├── dap/                  → dap/ (keep custom configs)\n├── editing/              → editor/\n│   ├── flash.lua         → editor/flash.lua (extend LazyVim extra)\n├── folding/              → editor/\n├── integration/          → keep as-is or move to util/\n├── langs/                → lang/\n│   ├── kubernetes-schema-snippets.lua → lang/\n│   ├── luasnip.lua       → lang/\n│   ├── nvim-java.lua     → lang/ (extend LazyVim java extra)\n├── lsp/\n│   ├── configs/          → flatten to lsp/\n│   │   ├── conform.lua   → lsp/conform.lua (extend LazyVim extra)\n│   │   ├── nvim-lint.lua → lsp/nvim-lint.lua\n│   │   ├── mason.lua     → DELETE (LazyVim handles)\n│   │   ├── nvim-lspconfig.lua → lsp/nvim-lspconfig.lua (extend)\n│   ├── settings/         → integrate into lsp/nvim-lspconfig.lua opts.servers\n├── navigation/           → editor/\n│   ├── nvim-tree.lua     → editor/nvim-tree.lua\n│   ├── telescope.lua     → DELETE (LazyVim handles)\n├── sessions/             → DELETE (use LazyVim persistence)\n├── terminal/             → DELETE (LazyVim has terminal integration)\n├── testing/              → DELETE (LazyVim test extra)\n├── ui/                   → ui/ (keep custom UI)\n│   ├── nvim-notify.lua   → ui/nvim-notify.lua\n├── version-control/      → editor/ or DELETE (LazyVim gitsigns extra)\n├── writing/              → lang/\n│   ├── obsidian.lua      → lang/obsidian.lua (move from root)\n│   ├── pomo.lua          → util/pomo.lua (move from root)\n├── database/             → util/\n├── fun/                  → fun/ (keep)\n```\n\n### Files to Create/Move\n\n1. **Move root plugins to proper locations:**\n   - `lua/plugins/obsidian.lua` → `lua/plugins/lang/obsidian.lua`\n   - `lua/plugins/pomo.lua` → `lua/plugins/util/pomo.lua`\n   - `lua/plugins/yaml.lua` → `lua/plugins/lang/yaml.lua`\n   - `lua/plugins/legendary.lua` → `lua/plugins/util/legendary.lua`\n   - `lua/plugins/better-escape.lua` → `lua/plugins/editor/better-escape.lua`\n\n2. **Update plugin loader (lua/plugins/init.lua):**\n```lua\n---@type LazySpec\nreturn {\n  -- Import plugin categories\n  { import = \"plugins.ai\" },\n  { import = \"plugins.colorscheme\" },\n  { import = \"plugins.dap\" },\n  { import = \"plugins.editor\" },\n  { import = \"plugins.lang\" },\n  { import = \"plugins.lsp\" },\n  { import = \"plugins.ui\" },\n  { import = \"plugins.util\" },\n  { import = \"plugins.fun\" },\n}\n```\n\n3. **Update all type annotations:**\n   - Change `---@type NvPluginSpec` to `---@type LazySpec`\n   - Update any `require(\"nvchad.plugins\")` references",
+        "testStrategy": "1. Run `:Lazy` and verify all plugins are discovered\n2. Check `:Lazy health` for any import errors\n3. Verify no duplicate plugin definitions\n4. Test each category loads correctly:\n   - `:Telescope` for editor plugins\n   - `:Mason` for LSP plugins\n   - `:Obsidian` for lang plugins\n5. Run `:checkhealth` for overall health check",
         "priority": "high",
-        "details": "For each language, create detailed content adhering to size requirements (50-100 lines for SKILL.md, 150-300 lines for topic files). Go content should cover: exported naming, table-driven tests, go mod/work, error wrapping, goroutines. Python should include: PEP 8, type hints, pytest vs unittest, pip/poetry/uv comparisons, decorators, async patterns. Java needs: modern features (records/sealed), JUnit 5, Maven/Gradle, builder pattern, Optional usage. Kotlin requires: null safety, Kotest/MockK, coroutines, sealed classes, DSLs. TypeScript must have: type vs interface, Jest/Vitest, tsconfig best practices, utility types, discriminated unions. Focus on actionable insights unique to each language, avoiding generic programming concepts. Include current tool versions and modern practices (2024 standards).\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md (see \"Content Guidelines\" and \"Language Coverage\" sections)\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 2, Tasks 2.1-2.5)",
-        "testStrategy": "Content review checklist: verify each topic file meets line count requirements (150-300 lines), check for technical accuracy against official documentation, validate that examples use current syntax and libraries, ensure no framework-specific content in core files, test that all internal markdown links resolve correctly. Use automated readability scoring to ensure content is clear and actionable.",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Create Go Language Skill Content with Modern Practices",
-            "description": "Research and write comprehensive Go language content covering exported naming conventions, table-driven testing patterns, module management with go mod/work, error wrapping best practices, and goroutine patterns for concurrency",
+            "title": "Create New LazyVim-Compatible Directory Structure",
+            "description": "Create the target directory structure for LazyVim-compatible plugin organization. This involves creating new directories (colorscheme/, editor/, lang/, util/) while keeping existing directories that align with LazyVim conventions (ai/, dap/, ui/, lsp/, fun/).",
             "dependencies": [],
-            "details": "Create Go skill content in .claude/skills/lang-go/ with SKILL.md (50-100 lines) covering overview and navigation. Write style.md focusing on exported vs unexported naming, receiver naming conventions, and idiomatic Go formatting. Develop testing.md with table-driven test examples, subtests, test fixtures, and benchmarking patterns. Create tooling.md covering go mod vs go work for monorepos, vendoring strategies, and essential tools like golangci-lint. Write patterns.md featuring error wrapping with fmt.Errorf(%w), context propagation, goroutine lifecycle management, and channel patterns. Ensure all content uses Go 1.21+ features and follows 2024 best practices. Reference design document sections on \"Content Guidelines\" for proper structure and \"Language Coverage\" for Go-specific requirements.",
+            "details": "Create the following new directories under lua/plugins/:\n- colorscheme/ - For theme/colorscheme plugins\n- editor/ - For editing/navigation/folding plugins\n- lang/ - For language-specific plugins (merged from langs/ and writing/)\n- util/ - For utility plugins (database, integration, misc)\n\nDirectories to keep as-is:\n- ai/ (11 files - keep all AI integrations)\n- dap/ (3 files + settings/ subfolder - keep debugging configs)\n- ui/ (8 files - keep UI enhancements)\n- fun/ (4 files - keep fun plugins)\n\nDirectories to be merged/removed in subsequent steps:\n- core/ (8 files → split to editor/, ui/, util/)\n- navigation/ (9 files → merge into editor/)\n- editing/ (8 files → merge into editor/)\n- folding/ (1 file → merge into editor/)\n- langs/ (9 files → rename to lang/)\n- writing/ (4 files → merge into lang/)\n- completion/ (2 files → DELETE, LazyVim handles)\n- sessions/ (2 files → DELETE, LazyVim persistence)\n- terminal/ (1 file → DELETE or util/)\n- testing/ (2 files → DELETE, LazyVim test extra)\n- version-control/ (4 files → merge into editor/)\n- database/ (1 file → move to util/)\n- integration/ (1 file → move to util/)\n- override/ (1 file → evaluate and move appropriately)",
             "status": "pending",
-            "testStrategy": "Validate all Go code examples compile and run correctly. Check adherence to official Go style guide. Verify line count requirements (50-100 for SKILL.md, 150-300 for topic files). Test all markdown links and code formatting."
+            "testStrategy": "Run `ls -la lua/plugins/` to verify new directories exist. Run `:Lazy` to ensure no import errors occur during the transition."
           },
           {
             "id": 2,
-            "title": "Implement Python Skill with Type Hints and Modern Tooling",
-            "description": "Develop Python language skill content covering PEP 8 compliance, type hints usage, pytest vs unittest comparison, package management tools evaluation (pip/poetry/uv), decorator patterns, and async/await patterns",
-            "dependencies": [],
-            "details": "Write Python skill content in .claude/skills/lang-python/ with SKILL.md overview. Create style.md covering PEP 8 essentials, type hints syntax with typing module, docstring formats (Google/NumPy/Sphinx), and naming conventions. Develop testing.md comparing pytest vs unittest with practical examples, fixture patterns, mocking strategies, and property-based testing with hypothesis. Write tooling.md comparing pip, poetry, and uv with use case recommendations, virtual environment management, and linting tools (ruff, mypy, black). Create patterns.md featuring decorator implementations, context managers, async/await patterns, and metaclass usage. Focus on Python 3.11+ features and modern practices. Follow implementation plan Task 2.2 specifications for research sources and content depth requirements.",
-            "status": "pending",
-            "testStrategy": "Verify all Python examples run on Python 3.11+. Validate type hints with mypy. Check PEP 8 compliance with ruff. Ensure pytest examples execute successfully. Validate markdown structure and line counts."
-          },
-          {
-            "id": 3,
-            "title": "Build Java Skill with Modern Features and JUnit 5",
-            "description": "Create Java language skill covering modern Java features (records, sealed classes, pattern matching), JUnit 5 testing, Maven vs Gradle comparison, builder pattern implementation, and Optional usage patterns",
-            "dependencies": [],
-            "details": "Develop Java skill in .claude/skills/lang-java/ with comprehensive SKILL.md. Write style.md covering naming conventions, package organization, JavaDoc best practices, and modern Java 17+ syntax including records and sealed classes. Create testing.md focusing on JUnit 5 features, parameterized tests, assertJ assertions, and Mockito patterns. Develop tooling.md comparing Maven vs Gradle with practical examples, dependency management strategies, and essential plugins. Write patterns.md featuring builder pattern with fluent interfaces, Optional chaining and mapping, Stream API best practices, and CompletableFuture for async operations. Emphasize Java 17+ LTS features. Adhere to content depth guidelines from implementation plan Task 2.3 (50-100 lines SKILL.md, 150-300 lines per topic file).",
-            "status": "pending",
-            "testStrategy": "Compile all Java examples with Java 17+. Run JUnit 5 test examples. Validate Maven and Gradle build configurations. Check JavaDoc formatting. Verify line count requirements and markdown structure."
-          },
-          {
-            "id": 4,
-            "title": "Develop Kotlin Skill with Null Safety and Coroutines",
-            "description": "Write Kotlin language skill content emphasizing null safety features, Kotest and MockK testing frameworks, coroutine patterns, sealed classes for state management, and DSL creation techniques",
-            "dependencies": [],
-            "details": "Create Kotlin skill in .claude/skills/lang-kotlin/ with navigation SKILL.md. Write style.md covering Kotlin idioms, null safety operators, data classes best practices, and extension functions. Develop testing.md featuring Kotest spec styles (FunSpec, StringSpec, BehaviorSpec), MockK for mocking, and coroutine testing with runTest. Create tooling.md covering Gradle Kotlin DSL, dependency management with version catalogs, and KtLint configuration. Write patterns.md showcasing sealed classes for state machines, coroutine patterns (flow, channels, structured concurrency), DSL creation with receiver functions, and delegation patterns. Focus on Kotlin 1.9+ features. Follow design document framework-agnostic core principles and practical guidance approach from Task 2.4 specifications.",
-            "status": "pending",
-            "testStrategy": "Verify Kotlin examples compile with Kotlin 1.9+. Run Kotest examples successfully. Validate coroutine patterns with kotlinx-coroutines-test. Check KtLint compliance. Ensure proper markdown formatting and line counts."
-          },
-          {
-            "id": 5,
-            "title": "Create TypeScript Skill with Advanced Types and Testing",
-            "description": "Implement TypeScript language skill covering type vs interface decisions, Jest and Vitest comparison, tsconfig best practices, utility types usage, and discriminated union patterns for type safety",
-            "dependencies": [],
-            "details": "Build TypeScript skill in .claude/skills/lang-typescript/ with comprehensive SKILL.md. Write style.md explaining when to use type vs interface, strict mode benefits, const assertions, and satisfies operator. Develop testing.md comparing Jest vs Vitest with configuration examples, type-safe mocking patterns, and testing async code. Create tooling.md covering tsconfig.json best practices for different project types, module resolution strategies, and build tools (tsc, esbuild, swc). Write patterns.md featuring utility types (Partial, Required, Pick, Omit), discriminated unions for exhaustive checking, branded types for validation, and conditional types. Target TypeScript 5.0+ features. Implement according to Task 2.5 research sources and content structure requirements, emphasizing practical over comprehensive approach as outlined in design principles.",
-            "status": "pending",
-            "testStrategy": "Type-check all examples with TypeScript 5.0+ strict mode. Run Jest and Vitest example tests. Validate tsconfig.json configurations. Check ESLint with typescript-eslint. Verify markdown structure and line requirements."
-          }
-        ]
-      },
-      {
-        "id": 3,
-        "title": "Enhance Template Cleanup Workflow with Language Selection",
-        "description": "Modify the GitHub Actions template-cleanup workflow to accept LANGUAGE parameter, prune unused language skills, and update process skill references",
-        "status": "pending",
-        "dependencies": [
-          1
-        ],
-        "priority": "high",
-        "details": "Update .github/workflows/template-cleanup.yml to add a new LANGUAGE input parameter with validation against supported languages (go, python, java, kotlin, typescript - case insensitive). Implement three new workflow steps: 1) Language validation step using bash to normalize input to lowercase and verify against allowed values, failing with clear error if invalid. 2) Language skill pruning step that removes all .claude/skills/lang-* directories except the one matching the selected language using find and rm commands. 3) Process skill update step that replaces all %LANGUAGE% placeholders in testing-process and development-process skills with the actual language name, and injects markdown reference links to the appropriate language skill files (e.g., [skills/lang-go/testing.md](./../lang-go/testing.md)). Use sed or similar for in-place replacements. Ensure the workflow maintains idempotency and handles edge cases like missing directories gracefully.\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md (see \"Template Cleanup Workflow\" section)\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 3, Tasks 3.1-3.5)",
-        "testStrategy": "Create test matrix for all 5 languages plus invalid inputs. For each valid language, verify: only selected language skill remains, all %LANGUAGE% placeholders are replaced, markdown links are correctly formatted and resolve, workflow completes successfully. For invalid inputs, verify workflow fails with helpful error message. Test case sensitivity handling (GO, go, Go should all work). Validate that re-running workflow doesn't break already-processed files.",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Add LANGUAGE input parameter to workflow",
-            "description": "Add a new workflow_dispatch input parameter LANGUAGE to the template-cleanup.yml workflow with proper validation and description",
-            "dependencies": [],
-            "details": "Modify the workflow_dispatch inputs section in .github/workflows/template-cleanup.yml to add a required LANGUAGE parameter. The parameter should include a description explaining it accepts one of: go, python, java, kotlin, typescript (case-insensitive). Set type to 'choice' with options for each language to provide dropdown selection in GitHub UI. Also add this as an input parameter to the workflow_call event if present for reusability.",
-            "status": "pending",
-            "testStrategy": "Test workflow dispatch with each valid language option through GitHub UI. Verify parameter is properly passed to subsequent steps. Test that workflow fails if parameter is missing when required."
-          },
-          {
-            "id": 2,
-            "title": "Implement language validation step",
-            "description": "Create a bash validation step that normalizes the LANGUAGE input to lowercase and validates it against the allowed languages list",
+            "title": "Move Root-Level Plugin Files to Appropriate Categories",
+            "description": "Relocate the 7 root-level plugin files (obsidian.lua, pomo.lua, yaml.lua, legendary.lua, better-escape.lua, actions-preview.lua, init.lua) to their proper category directories according to the LazyVim structure.",
             "dependencies": [
               1
             ],
-            "details": "Add a new job step after checkout that normalizes the LANGUAGE input using bash parameter expansion (${LANGUAGE,,}) to convert to lowercase. Validate the normalized value against the allowed list (go, python, java, kotlin, typescript) using a case statement or if-else chain. If invalid, use exit 1 with a clear error message listing valid options. Store the normalized language in a step output or environment variable for use in subsequent steps.",
+            "details": "Move the following files from lua/plugins/ root:\n\n1. obsidian.lua → lang/obsidian.lua (markdown/writing plugin)\n2. pomo.lua → util/pomo.lua (utility timer plugin)\n3. yaml.lua → lang/yaml.lua (language-specific plugin)\n4. legendary.lua → util/legendary.lua (utility/keymaps plugin)\n5. better-escape.lua → editor/better-escape.lua (editing enhancement)\n6. actions-preview.lua → editor/actions-preview.lua (code actions/editing)\n\nThe init.lua file stays in place but will be updated in subtask 5.\n\nFor each move:\n- Use git mv to preserve history\n- Verify no hardcoded paths reference the old location\n- Check for any require() statements that might break",
             "status": "pending",
-            "testStrategy": "Test with valid inputs in different cases (GO, Python, TYPESCRIPT). Test with invalid inputs (ruby, c++, blank). Verify error messages are clear and list valid options. Ensure normalized value is available to subsequent steps."
+            "testStrategy": "After each file move, run `:Lazy` and verify the plugin still loads. Check `:Lazy health` for any path resolution errors. Test each moved plugin's functionality (e.g., `:Obsidian` commands, `<leader>p` for pomo)."
           },
           {
             "id": 3,
-            "title": "Create language skill pruning step",
-            "description": "Implement a step that removes all .claude/skills/lang-* directories except the one matching the selected language",
+            "title": "Consolidate Category Directories into LazyVim Structure",
+            "description": "Merge the fragmented NvChad directories (core/, navigation/, editing/, folding/, langs/, writing/, version-control/, database/, integration/) into the unified LazyVim structure (editor/, lang/, util/).",
             "dependencies": [
+              1,
               2
             ],
-            "details": "Add a step using bash commands to prune unused language skills. First check if .claude/skills directory exists to handle edge cases gracefully. Use find command to locate all lang-* directories: find .claude/skills -maxdepth 1 -type d -name 'lang-*' ! -name \"lang-${normalized_language}\" -exec rm -rf {} +. Add error handling with || true to prevent workflow failure if directories don't exist. Log which directories are being removed for transparency.",
+            "details": "Execute the following directory consolidations:\n\n**To editor/ directory:**\n- core/: which-key.lua, numb.lua, cloak.lua, vim-suda.lua (keep utils.lua, store.lua for util/)\n- navigation/: nvim-tree.lua, flash.lua, telescope.lua, cinnamon.lua, oil.lua, todo-comments.lua, project.lua, tmux-navigation.lua, quicker.lua\n- editing/: comment.lua, harpoon.lua, mini-ai.lua, marks.lua, nvim-surround.lua, grug-far.lua, ts-comments.lua, nvim-spectre.lua\n- folding/: nvim-ufo.lua\n- version-control/: gitsigns.lua, diffview.lua, neogit.lua, git-blame.lua\n\n**To lang/ directory:**\n- langs/: All 9 files (rustaceanvim.lua, luasnip.lua, nvim-java.lua, jdtls.lua, flutter-tools.lua, laravel.lua, venv-selector.lua, kubernetes-schema-snippets.lua, kulala.lua)\n- writing/: markview.lua, helpview.lua, markdown-preview.lua, neorg.lua\n\n**To util/ directory:**\n- core/: utils.lua, store.lua\n- database/: vim-dadbod.lua\n- integration/: cord.lua\n- terminal/: toggleterm.lua (if keeping)\n\n**Directories to DELETE (LazyVim handles via extras):**\n- completion/ (blink-cmp.lua, nvim-cmp.lua)\n- sessions/ (auto-session.lua, persisted.lua)\n- testing/ (compiler.lua, neotest.lua) - evaluate if custom config needed\n- core/nvim-treesitter.lua (LazyVim extra)\n\n**Flatten lsp/ structure:**\n- Move lsp/configs/*.lua directly to lsp/\n- Integrate lsp/settings/*.lua into lsp/nvim-lspconfig.lua opts.servers\n- Keep lsp/opts.lua\n- Delete lsp/configs/mason.lua (LazyVim handles)",
             "status": "pending",
-            "testStrategy": "Test with full set of language directories present. Verify only selected language remains after pruning. Test with missing .claude/skills directory. Test with partially missing language directories. Verify idempotent behavior on repeated runs."
+            "testStrategy": "After each category merge:\n1. Run `:Lazy` to verify imports work\n2. Run `:Lazy health` for errors\n3. Test representative plugins from each merged category:\n   - editor/: `:NvimTreeToggle`, flash.nvim jump, gitsigns blame\n   - lang/: Open .rs file (rustaceanvim), .java file (jdtls)\n   - util/: `:DBUI` for dadbod, `:ToggleTerm`\n4. Verify no duplicate plugin definitions with `:Lazy profile`"
           },
           {
             "id": 4,
-            "title": "Implement process skill placeholder replacement",
-            "description": "Create a step that replaces %LANGUAGE% placeholders in testing-process and development-process skills with the selected language",
+            "title": "Update Type Annotations from NvPluginSpec to LazySpec",
+            "description": "Convert all 92 plugin files from NvChad's `---@type NvPluginSpec` annotation to LazyVim's `---@type LazySpec` annotation, and update any NvChad-specific require statements.",
             "dependencies": [
-              2
+              3
             ],
-            "details": "Add a step to update process skill files with the selected language. Use sed or similar tool to replace %LANGUAGE% with the capitalized language name and %LANGUAGE_LOWER% with the lowercase version. Target files: .claude/skills/testing-process/SKILL.md and .claude/skills/development-process/SKILL.md. Replace placeholders in text and construct proper markdown links like [skills/lang-${language}/testing.md](./../lang-${language}/testing.md). Use sed -i for in-place replacement with proper escaping. Add checks to verify files exist before modification.",
+            "details": "Perform global find-and-replace operations:\n\n1. **Type annotation update:**\n   - Replace `---@type NvPluginSpec` with `---@type LazySpec` in all 92 identified files\n   - Replace `---@type NvPluginSpec[]` with `---@type LazySpec[]` if any exist\n\n2. **Remove NvChad-specific references:**\n   - Update lua/serpro69/nvchad.lua to remove the NvChad plugin import\n   - Remove or update any `require(\"nvchad.plugins\")` references\n   - Update any `require(\"nvchad.configs.xyz\")` to use LazyVim equivalents\n\n3. **Files requiring annotation update (92 total):**\n   - All files in ai/ (11 files)\n   - All files in completion/ (2 files - if not deleted)\n   - All files in core/ (8 files)\n   - All files in dap/ (3 files)\n   - All files in editing/ (8 files)\n   - All files in navigation/ (9 files)\n   - All files in lsp/configs/ (13 files)\n   - All files in ui/ (8 files)\n   - All files in version-control/ (4 files)\n   - All files in writing/ (4 files)\n   - All files in fun/ (4 files)\n   - All files in langs/ (9 files)\n   - All files in testing/ (2 files)\n   - All files in database/ (1 file)\n   - All files in integration/ (1 file)\n   - All files in terminal/ (1 file)\n   - All files in sessions/ (2 files)\n   - All files in folding/ (1 file)\n   - Root level files (6 files: pomo, obsidian, yaml, legendary, better-escape, actions-preview)\n\n4. **Verify LazySpec compatibility:**\n   - Ensure opts function signatures match LazyVim patterns\n   - Update any config functions that use NvChad-specific APIs",
             "status": "pending",
-            "testStrategy": "Verify all %LANGUAGE% and %LANGUAGE_LOWER% placeholders are replaced. Test markdown link generation and ensure links resolve correctly. Verify replacements work for all 5 languages. Check file integrity after modifications."
+            "testStrategy": "1. Run `grep -r 'NvPluginSpec' lua/plugins/` to verify no instances remain\n2. Run `grep -r 'nvchad' lua/` to find remaining NvChad references\n3. Run `:Lazy` and verify all plugins load without type errors\n4. Check Neovim startup for any Lua type annotation warnings\n5. Run `:checkhealth lazy` for any configuration issues"
           },
           {
             "id": 5,
-            "title": "Add workflow status reporting and error handling",
-            "description": "Implement comprehensive error handling and status reporting throughout the workflow to ensure clear feedback and graceful failure modes",
+            "title": "Update Plugin Loader (init.lua) with New Import Structure",
+            "description": "Rewrite lua/plugins/init.lua to reflect the new LazyVim-compatible directory structure, removing defunct imports and adding new category imports.",
             "dependencies": [
               3,
               4
             ],
-            "details": "Add echo statements to report progress at each major step (validating language, pruning skills, updating references). Implement proper error handling with meaningful exit codes and messages. Add a final summary step that reports what was done (selected language, directories removed, files updated). Use GitHub Actions ::notice, ::warning, and ::error commands for better visibility in workflow logs. Ensure all steps handle edge cases like missing directories or files gracefully without failing the entire workflow unless critical.",
+            "details": "Replace the current init.lua content (20 lines with 19 imports) with the new LazyVim structure:\n\n**Current imports to REMOVE:**\n- { import = \"plugins.completion\" } → LazyVim blink.cmp extra\n- { import = \"plugins.core\" } → Split to editor/ui/util\n- { import = \"plugins.editing\" } → Merged into editor/\n- { import = \"plugins.folding\" } → Merged into editor/\n- { import = \"plugins.navigation\" } → Merged into editor/\n- { import = \"plugins.sessions\" } → LazyVim persistence extra\n- { import = \"plugins.terminal\" } → Evaluate (util/ or delete)\n- { import = \"plugins.testing\" } → LazyVim test extra\n- { import = \"plugins.version-control\" } → Merged into editor/\n- { import = \"plugins.writing\" } → Merged into lang/\n- { import = \"plugins.database\" } → Merged into util/\n- { import = \"plugins.integration\" } → Merged into util/\n- { import = \"plugins.langs\" } → Renamed to lang/\n- { import = \"plugins.lsp.configs\" } → Flattened to lsp/\n\n**New init.lua content:**\n```lua\n---@type LazySpec\nreturn {\n  -- Import plugin categories (LazyVim-compatible structure)\n  { import = \"plugins.ai\" },\n  { import = \"plugins.colorscheme\" },\n  { import = \"plugins.dap\" },\n  { import = \"plugins.editor\" },\n  { import = \"plugins.lang\" },\n  { import = \"plugins.lsp\" },\n  { import = \"plugins.ui\" },\n  { import = \"plugins.util\" },\n  { import = \"plugins.fun\" },\n}\n```\n\n**Additional considerations:**\n- Ensure colorscheme/ directory has at least one .lua file or an init.lua\n- Verify each imported directory contains valid plugin specs\n- Update any cross-references between plugin files that use old paths",
             "status": "pending",
-            "testStrategy": "Test workflow with various failure scenarios (missing directories, malformed files). Verify error messages are clear and actionable. Test that non-critical failures don't stop the workflow. Verify summary output is accurate and helpful."
+            "testStrategy": "1. Run `:Lazy` and verify:\n   - All 9 categories are listed in the plugin manager\n   - No 'module not found' errors for imports\n   - Plugin count matches expected (should be similar to before migration)\n2. Run `:Lazy health` for any import path errors\n3. Verify no duplicate plugin definitions with `:Lazy profile`\n4. Test each category loads by checking representative plugins:\n   - ai/: `:Copilot status`\n   - colorscheme/: Verify theme loads\n   - dap/: `:DapToggleBreakpoint`\n   - editor/: `:NvimTreeToggle`, `:Telescope`\n   - lang/: Open language-specific files\n   - lsp/: `:LspInfo`\n   - ui/: `:Noice` or notifications\n   - util/: `:Legendary`\n   - fun/: `:CellularAutomaton`\n5. Full restart test: Close and reopen Neovim, verify clean startup"
           }
         ]
       },
       {
-        "id": 4,
-        "title": "Integrate Language Skills with Existing Process Skills",
-        "description": "Update testing-process and development-process skills to include %LANGUAGE% placeholders and prepare for automatic reference injection by the cleanup workflow",
-        "status": "pending",
+        "id": 9,
+        "title": "Migrate LSP Configuration to LazyVim Pattern",
+        "description": "Convert LSP server settings from separate files in lua/plugins/lsp/settings/ to LazyVim's opts.servers pattern in nvim-lspconfig.lua, preserving custom configurations for yamlls, terraformls, kotlinls, and others.",
+        "details": "## Implementation Steps\n\n### 1. Create new lua/plugins/lsp/nvim-lspconfig.lua\n\nConvert from separate settings files to inline opts.servers:\n\n```lua\n---@type LazySpec\nreturn {\n  \"neovim/nvim-lspconfig\",\n  opts = {\n    servers = {\n      -- From lua/plugins/lsp/settings/ansiblels.lua\n      ansiblels = {\n        settings = {\n          ansible = {\n            validation = { lint = { enabled = true } },\n          },\n        },\n      },\n      -- From lua/plugins/lsp/settings/yamlls.lua\n      yamlls = {\n        settings = {\n          yaml = {\n            schemas = {\n              [\"https://json.schemastore.org/github-workflow.json\"] = \"/.github/workflows/*\",\n              [\"https://raw.githubusercontent.com/instrumenta/kubernetes-json-schema/master/v1.18.0-standalone-strict/all.json\"] = \"/*.k8s.yaml\",\n            },\n            validate = true,\n            completion = true,\n          },\n        },\n      },\n      -- From lua/plugins/lsp/settings/terraformls.lua\n      terraformls = {},\n      -- From lua/plugins/lsp/settings/kotlin_lsp.lua  \n      kotlin_language_server = {\n        settings = {\n          kotlin = {\n            compiler = { jvm = { target = \"17\" } },\n          },\n        },\n      },\n      -- From lua/plugins/lsp/settings/gopls.lua\n      gopls = {\n        settings = {\n          gopls = {\n            gofumpt = true,\n            codelenses = {\n              gc_details = false,\n              generate = true,\n              regenerate_cgo = true,\n              run_govulncheck = true,\n              test = true,\n              tidy = true,\n              upgrade_dependency = true,\n              vendor = true,\n            },\n            hints = {\n              assignVariableTypes = true,\n              compositeLiteralFields = true,\n              compositeLiteralTypes = true,\n              constantValues = true,\n              functionTypeParameters = true,\n              parameterNames = true,\n              rangeVariableTypes = true,\n            },\n            analyses = {\n              fieldalignment = true,\n              nilness = true,\n              unusedparams = true,\n              unusedwrite = true,\n              useany = true,\n            },\n            usePlaceholders = true,\n            completeUnimported = true,\n            staticcheck = true,\n            directoryFilters = { \"-.git\", \"-.vscode\", \"-.idea\", \"-.vscode-test\", \"-node_modules\" },\n            semanticTokens = true,\n          },\n        },\n      },\n      -- Add other servers from settings/ directory...\n      bashls = {},\n      dockerls = {},\n      docker_compose_language_service = {},\n      marksman = {},\n      nil_ls = {},  -- Nix language server\n      ts_ls = {},\n      pyright = {},\n      lua_ls = {\n        settings = {\n          Lua = {\n            workspace = { checkThirdParty = false },\n            codeLens = { enable = true },\n            completion = { callSnippet = \"Replace\" },\n          },\n        },\n      },\n    },\n    -- Ensure these are installed by mason\n    setup = {\n      -- Custom setup for specific servers if needed\n    },\n  },\n}\n```\n\n### 2. Migrate Mason packages list\n\nThe Mason packages from chadrc.lua need to be handled by LazyVim's mason-lspconfig integration. LazyVim automatically installs servers listed in opts.servers.\n\nFor formatters/linters, use conform and nvim-lint extras.\n\n### 3. Delete obsolete files\n\n- Delete lua/plugins/lsp/configs/mason.lua\n- Delete individual settings files after integration\n- Keep lsp-lens.lua if customizations are needed\n- Keep lspsaga.lua if using it\n\n### Files to preserve custom settings from:\n- ansiblels.lua, bashls.lua, dockerls.lua, docker_compose_language_service.lua\n- gopls.lua, jdtls.lua, kotlin_lsp.lua, lua_ls.lua\n- marksman.lua, nil.lua, pyright.lua, terraformls.lua\n- ts_ls.lua, yamlls.lua",
+        "testStrategy": "1. Open files of each configured language and verify LSP attaches:\n   - `.go` files → gopls\n   - `.tf` files → terraformls\n   - `.yaml` files → yamlls\n   - `.kt` files → kotlin_language_server\n   - `.lua` files → lua_ls\n2. Test `:LspInfo` shows correct server for each filetype\n3. Verify code completion works via LSP\n4. Test go-to-definition, hover, and rename operations\n5. Check `:Mason` shows all expected packages installed",
+        "priority": "high",
         "dependencies": [
-          1
+          6,
+          8
         ],
-        "priority": "medium",
-        "details": "Modify testing-process/SKILL.md to include a new section with the pattern: 'Use %LANGUAGE% best practices and well-established %LANGUAGE% testing tools. For comprehensive %LANGUAGE% testing guidance including [language-specific features], see the `lang-%LANGUAGE_LOWER%` skill at [skills/lang-%LANGUAGE_LOWER%/testing.md](./../lang-%LANGUAGE_LOWER%/testing.md).' Add similar reference in development-process/SKILL.md for tooling guidance. Ensure placeholders use consistent naming: %LANGUAGE% for display name, %LANGUAGE_LOWER% for file paths. Position these references naturally within existing content flow. Update both skills to maintain backward compatibility - the placeholders should read sensibly even before replacement. Consider adding a comment marker around injected content for easier future updates.\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md (see \"Integration with Process Skills\" section)\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 4, Tasks 4.1-4.2)",
-        "testStrategy": "Verify placeholder patterns are consistent and correctly formatted in both process skills. Test the replacement logic with sample language values to ensure natural reading flow. Validate markdown link syntax before and after replacement. Check that skills remain functional without language skills present (backward compatibility). Test that navigation from process skills to language skills works correctly after workflow processing.",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Analyze existing process skill files and identify integration points",
-            "description": "Examine testing-process/SKILL.md and development-process/SKILL.md to understand current structure and identify optimal locations for language-specific placeholder sections",
+            "title": "Create LazyVim-style nvim-lspconfig.lua with opts.servers pattern",
+            "description": "Refactor lua/plugins/lsp/configs/nvim-lspconfig.lua to use LazyVim's opts.servers pattern, consolidating all 27 LSP server configurations from individual settings files into a single spec.",
             "dependencies": [],
-            "details": "Read both .claude/skills/testing-process/SKILL.md and .claude/skills/development-process/SKILL.md files. Map the current content structure and identify natural insertion points where language-specific references would flow seamlessly. Document the existing markdown structure, section headings, and content flow. Note any existing cross-references or patterns that should be maintained. Create a plan for where to insert the new sections without disrupting the existing logical flow. Current analysis shows testing-process/SKILL.md already has %LANGUAGE% placeholders on lines 20-21, and development-process/SKILL.md has a dependency management section that would be suitable for tooling references.",
+            "details": "Transform the current nvim-lspconfig.lua from diagnostic-only config to LazyVim's opts.servers pattern:\n\n1. Keep existing diagnostic configuration and keymaps from init function\n2. Add opts.servers block with all server configurations:\n   - Servers with custom settings: yamlls (schemastore integration, customTags), gopls (inlay hints), lua_ls (semantic tokens, diagnostics, workspace), pyright (typeCheckingMode, diagnosticMode), ts_ls (Vue plugin, inlay hints for JS/TS), vtsls (Vue typescript plugin), volar (hybrid mode), jsonls (schemastore with mise schemas), clangd, cssls, tailwindcss, omnisharp, html\n   - Servers with filetypes only: bashls (sh, bash, zsh), jinja_lsp\n   - Empty config servers: ansiblels, terraformls, kotlinls, dockerls, docker_compose_language_service, marksman, nil_ls, jdtls, elixir-ls, perlnavigator, sqlls, powershell_es\n3. Preserve schemastore plugin dependency for yamlls and jsonls\n4. Add opts.setup section for servers needing custom setup (e.g., kotlin_lsp manual enable)",
             "status": "pending",
-            "testStrategy": "Verify that both process skill files are correctly analyzed and insertion points are documented with line numbers and section context"
+            "testStrategy": "1. Run :LspInfo on files of each configured language to verify servers attach\n2. Test schemastore integration works for YAML/JSON files\n3. Verify inlay hints work for Go and TypeScript files\n4. Check Vue files get both vtsls and volar attached"
           },
           {
             "id": 2,
-            "title": "Update testing-process skill with language placeholder section",
-            "description": "Modify testing-process/SKILL.md to include the specified language placeholder pattern with proper markdown formatting and comment markers",
+            "title": "Migrate opts.lua functionality to LazyVim pattern",
+            "description": "Convert lua/plugins/lsp/opts.lua (capabilities, keymaps, on_attach, document highlighting) to LazyVim's recommended approach using opts function extension.",
             "dependencies": [
               1
             ],
-            "details": "Insert a new section in .claude/skills/testing-process/SKILL.md containing the exact pattern: 'Use %LANGUAGE% best practices and well-established %LANGUAGE% testing tools. For comprehensive %LANGUAGE% testing guidance including [language-specific features], see the `lang-%LANGUAGE_LOWER%` skill at [skills/lang-%LANGUAGE_LOWER%/testing.md](./../lang-%LANGUAGE_LOWER%/testing.md).' Wrap this section with HTML comment markers like <!-- LANGUAGE_INJECTION_START --> and <!-- LANGUAGE_INJECTION_END --> for easier future updates. Ensure the section integrates naturally with surrounding content and maintains markdown formatting consistency. Note that existing %LANGUAGE% placeholders are already present on lines 20-21, so coordinate with these existing patterns.",
+            "details": "Integrate opts.lua functionality into the new nvim-lspconfig.lua:\n\n1. Move capabilities configuration to opts.capabilities or use LazyVim's built-in capabilities enhancement\n2. Convert lsp_keymaps function to opts.keys or use LazyVim's default keymaps with overrides\n3. Migrate lsp_highlight (document highlighting on CursorHold) to LazyVim's pattern:\n   - Can be in opts.on_attach or as a separate autocmd\n   - Preserve semantic tokens disable behavior\n4. Update Lspsaga keymaps (gD finder, gd goto_definition, gl diagnostics, gp peek, K hover) to work with LazyVim's keymap system\n5. Remove opts.lua after migration or convert to helper module if needed for other plugins",
             "status": "pending",
-            "testStrategy": "Test placeholder replacement with sample values (e.g., Python/python, Go/go) to ensure natural reading flow and verify markdown link syntax renders correctly"
+            "testStrategy": "1. Open any file with LSP support and verify all keymaps work: gd (definition), gD (declaration), gI (implementation), K (hover), gl (line diagnostics)\n2. Test document highlighting: place cursor on symbol, verify highlighting after CursorHold\n3. Verify semantic tokens are disabled as expected\n4. Test Lspsaga integration keymaps work correctly"
           },
           {
             "id": 3,
-            "title": "Update development-process skill with tooling placeholder section",
-            "description": "Modify development-process/SKILL.md to include language-specific tooling guidance placeholders with consistent formatting",
+            "title": "Update Mason configuration for LazyVim compatibility",
+            "description": "Refactor lua/plugins/lsp/configs/mason.lua to work with LazyVim's mason-lspconfig integration pattern, removing manual server setup loop in favor of opts.servers auto-setup.",
             "dependencies": [
               1
             ],
-            "details": "Insert a new section in .claude/skills/development-process/SKILL.md for tooling guidance using the pattern: 'For %LANGUAGE%-specific development tooling and ecosystem guidance, refer to the `lang-%LANGUAGE_LOWER%` skill at [skills/lang-%LANGUAGE_LOWER%/tooling.md](./../lang-%LANGUAGE_LOWER%/tooling.md).' Add similar comment markers (<!-- LANGUAGE_INJECTION_START --> and <!-- LANGUAGE_INJECTION_END -->) around the injected content. Based on implementation documentation Task 4.2, this should be added after the 'Working with Dependencies' section which currently focuses on external dependencies and Context7 usage.",
+            "details": "Convert mason.lua to LazyVim pattern:\n\n1. Remove mason-lspconfig dependency block with manual configure() function\n2. Keep mason.nvim base config (UI settings, registries including nvim-java)\n3. Let LazyVim's mason-lspconfig handle automatic server installation based on opts.servers\n4. Update excluded servers list (jdtls, rust_analyzer) to use LazyVim's opts.setup pattern\n5. Handle kotlin_lsp special case (not installed via mason) in opts.setup\n6. Keep mason-nvim-dap configuration for DAP handlers\n7. Remove or simplify the package:install:success callback since LazyVim handles this\n8. Preserve custom keymap for Mason UI (<leader>lm)",
             "status": "pending",
-            "testStrategy": "Validate markdown syntax before and after placeholder replacement, test with multiple language values to ensure consistent formatting"
+            "testStrategy": "1. Run :Mason and verify UI opens correctly\n2. Install a new LSP server and verify auto-attachment\n3. Check jdtls and rust_analyzer remain excluded from auto-setup\n4. Verify kotlin_lsp attaches to .kt files despite not being in Mason"
           },
           {
             "id": 4,
-            "title": "Implement backward compatibility and readability checks",
-            "description": "Ensure both updated process skills remain functional and readable even before placeholder replacement occurs",
+            "title": "Delete obsolete individual LSP settings files",
+            "description": "Remove the lua/plugins/lsp/settings/ directory and all 27 individual server configuration files after consolidating them into the new nvim-lspconfig.lua opts.servers pattern.",
             "dependencies": [
+              1,
               2,
               3
             ],
-            "details": "Review both modified skill files to ensure the placeholder sections read sensibly as standalone content. The text should be grammatically correct and provide value even if the %LANGUAGE% placeholders are never replaced. Add conditional phrasing if needed, such as 'When working with a specific programming language, use [language] best practices...' Verify that the skills maintain their core value proposition without requiring the language skills to be present. Follow the pattern established in the design documentation showing graceful degradation when language skills are not available.",
+            "details": "Clean up after successful migration:\n\n1. Delete entire lua/plugins/lsp/settings/ directory containing:\n   - Empty config files: ansiblels.lua, terraformls.lua, kotlin_lsp.lua, dockerls.lua, docker_compose_language_service.lua, marksman.lua, nil.lua, jdtls.lua\n   - Files with filetypes only: bashls.lua, jinja_lsp.lua\n   - Files with settings: yamlls.lua, gopls.lua, lua_ls.lua, pyright.lua, ts_ls.lua, vtsls.lua, volar.lua, jsonls.lua, clangd.lua, cssls.lua, tailwindcss.lua, omnisharp.lua, html.lua, elixir-ls.lua, perlnavigator.lua, sqlls.lua, powershell_es.lua\n2. Delete lua/plugins/lsp/opts.lua if fully migrated\n3. Update any require() statements that referenced these files\n4. Verify no other plugins depend on these settings files",
             "status": "pending",
-            "testStrategy": "Read through both skills with placeholders unreplaced to verify coherent flow, test skills without any language skills present to ensure no broken references"
+            "testStrategy": "1. Start Neovim and verify no 'module not found' errors\n2. Open files of various types (go, yaml, lua, python, typescript) and verify LSP works\n3. Run :checkhealth lspconfig to verify no issues\n4. Grep codebase for any remaining references to deleted files"
           },
           {
             "id": 5,
-            "title": "Create integration documentation and validation scripts",
-            "description": "Document the integration pattern and create validation logic for the cleanup workflow to use when replacing placeholders",
+            "title": "Verify LSP functionality across all configured languages",
+            "description": "Comprehensive testing of LSP configuration migration by opening files of each configured language and verifying server attachment, features, and custom settings.",
             "dependencies": [
+              1,
+              2,
+              3,
               4
             ],
-            "details": "Create a markdown file documenting the placeholder patterns (%LANGUAGE% for display, %LANGUAGE_LOWER% for paths), the comment marker convention, and the expected replacement behavior. Include examples showing before/after states for different languages as shown in implementation.md Task 4.1. Prepare validation rules that the cleanup workflow can use: check for consistent placeholder naming, verify markdown link syntax, ensure comment markers are properly paired, validate that all placeholders in a section are replaced atomically. Document any edge cases or special handling requirements. Reference the design documentation for the complete integration approach and expected user experience.",
+            "details": "Create test verification checklist:\n\n1. Test servers with custom settings:\n   - yamlls: Open .yaml file, verify schemas work (k8s, github workflows)\n   - gopls: Open .go file, verify inlay hints display\n   - lua_ls: Open .lua file, verify vim global recognized\n   - pyright: Open .py file, verify type checking is off\n   - ts_ls/vtsls: Open .ts/.vue file, verify inlay hints and Vue plugin\n   - jsonls: Open .json file, verify mise schema works\n\n2. Test servers with basic config:\n   - bashls: Open .sh file, verify LSP attaches\n   - terraformls: Open .tf file, verify LSP attaches\n   - dockerls: Open Dockerfile, verify LSP attaches\n   - kotlinls: Open .kt file, verify LSP attaches\n\n3. Verify excluded servers:\n   - jdtls: Should not auto-attach (managed separately)\n   - rust_analyzer: Should not auto-attach (managed separately)\n\n4. Test common operations:\n   - Code completion, go to definition, hover, diagnostics\n   - Format on save via conform integration\n   - Lspsaga commands work correctly",
             "status": "pending",
-            "testStrategy": "Test documentation completeness by having the cleanup workflow implementation follow only the documentation, verify all edge cases are covered"
+            "testStrategy": "1. Run :LspInfo on each file type and verify correct server(s) attached\n2. Test code completion in at least 5 different languages\n3. Test go-to-definition works across file boundaries\n4. Verify hover shows documentation\n5. Check diagnostics appear for intentional errors\n6. Run full test suite if available"
           }
         ]
       },
       {
-        "id": "5",
-        "title": "Update Documentation and Migration Guides",
-        "description": "Create comprehensive documentation updates for CLAUDE.md and README.md, plus migration guide for existing users adopting the new language skills feature",
-        "status": "pending",
+        "id": 10,
+        "title": "Migrate Formatter and Linter Configuration",
+        "description": "Convert conform.lua and nvim-lint.lua to LazyVim extension pattern, preserving custom formatters (ktfmt for Kotlin, yamlfmt for YAML) and linters (eslint_d, shellcheck, ktlint).",
+        "details": "## Implementation Steps\n\n### 1. Create lua/plugins/lsp/conform.lua (extending LazyVim extra)\n\n```lua\n---@type LazySpec\nreturn {\n  \"stevearc/conform.nvim\",\n  opts = function(_, opts)\n    -- Extend LazyVim's default formatters_by_ft\n    opts.formatters_by_ft = vim.tbl_deep_extend(\"force\", opts.formatters_by_ft or {}, {\n      php = { \"pint\" },\n      blade = { \"blade-formatter\" },\n      cpp = { \"clang_format\" },\n      c = { \"clang_format\" },\n      go = { \"gofumpt\" },\n      yaml = { \"yamlfmt\" },\n      css = { \"prettier\" },\n      html = { \"prettier\" },\n      json = { \"prettier\" },\n      javascript = { \"prettier\" },\n      javascriptreact = { \"prettier\" },\n      typescript = { \"prettier\" },\n      typescriptreact = { \"prettier\" },\n      vue = { \"prettier\" },\n      kotlin = { \"ktfmt\" },\n      graphql = { \"prettier\" },\n      less = { \"prettier\" },\n      scss = { \"prettier\" },\n      flow = { \"prettier\" },\n    })\n\n    -- Custom format_after_save logic\n    opts.format_after_save = function(bufnr)\n      if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then\n        return\n      end\n      local bufname = vim.api.nvim_buf_get_name(bufnr)\n      if bufname:match(\"/node_modules/\") then\n        return\n      end\n      return { timeout_ms = 500, lsp_format = \"fallback\" }\n    end\n\n    -- Custom formatter configuration for ktfmt\n    opts.formatters = vim.tbl_deep_extend(\"force\", opts.formatters or {}, {\n      ktfmt = {\n        append_args = { \"--kotlinlang-style\" },\n      },\n    })\n\n    return opts\n  end,\n}\n```\n\n### 2. Create lua/plugins/lsp/nvim-lint.lua\n\nNote: Current config has nvim-lint disabled. Preserve the configuration but keep it disabled:\n\n```lua\n---@type LazySpec\nreturn {\n  \"mfussenegger/nvim-lint\",\n  enabled = false, -- Currently disabled in original config\n  opts = {\n    linters_by_ft = {\n      javascript = { \"eslint_d\" },\n      javascriptreact = { \"eslint_d\" },\n      typescript = { \"eslint_d\" },\n      typescriptreact = { \"eslint_d\" },\n      markdown = { \"markdownlint\" },\n      sh = { \"shellcheck\" },\n      yaml = { \"yamllint\" },\n      kotlin = { \"ktlint\" },\n    },\n  },\n  config = function(_, opts)\n    local lint = require(\"lint\")\n    lint.linters_by_ft = opts.linters_by_ft\n    vim.api.nvim_create_autocmd({ \"CursorHold\", \"CursorHoldI\" }, {\n      callback = function()\n        lint.try_lint()\n      end,\n    })\n  end,\n}\n```\n\n### 3. Delete obsolete files\n\n- Delete lua/plugins/lsp/configs/conform.lua (after migration)\n- Delete lua/plugins/lsp/configs/nvim-lint.lua (after migration)\n\n### Key Considerations\n- LazyVim's conform extra already provides basic configuration\n- We're extending it with custom formatters, not replacing\n- Preserve the format_after_save logic that disables for node_modules\n- Keep ktfmt's kotlinlang-style argument",
+        "testStrategy": "1. Open a `.kt` file and save → verify ktfmt formats with kotlinlang-style\n2. Open a `.yaml` file and save → verify yamlfmt runs\n3. Open a `.ts` file and save → verify prettier formats\n4. Open a file in node_modules and save → verify no formatting occurs\n5. Set `vim.g.disable_autoformat = true` and save → verify no formatting\n6. Test `:ConformInfo` shows correct formatter for each filetype\n7. If nvim-lint is enabled, test linting triggers on CursorHold",
+        "priority": "high",
         "dependencies": [
-          3,
-          4
+          6,
+          8,
+          9
         ],
-        "priority": "medium",
-        "details": "Update CLAUDE.md with a new 'Language-Specific Skills' section explaining the feature, listing available languages, describing skill structure, and providing usage patterns (automatic references, direct invocation, framework extensions). Add best practices for when to use language skills vs process skills. Update README.md Features section to highlight 'Language-Specific Development Skills' with supported languages list. Clarify in Quick Start that the LANGUAGE parameter in template-cleanup determines which skill is included. Create docs/wip/language-specific-skills/migration.md with step-by-step guide for existing projects to adopt language skills: how to run cleanup workflow on existing repo, manual steps if needed, how to verify successful integration. Include troubleshooting section for common issues (missing language skill, broken links, workflow failures). Add examples of framework extension patterns users can follow.\n\nReference Documentation:\n- Design: /docs/wip/language-specific-skills/design.md (see \"User Experience\" section)\n- Implementation Plan: /docs/wip/language-specific-skills/implementation.md (Phase 4, Tasks 4.3-4.5)",
-        "testStrategy": "Documentation validation: check all markdown files render correctly, verify all internal links resolve, validate code examples syntax, ensure instructions are complete and reproducible. Have test users follow migration guide on sample existing project to identify gaps. Review documentation against actual implementation to ensure accuracy. Test that all mentioned file paths and commands work as documented.",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Analyze existing documentation structure and patterns",
-            "description": "Explore the current CLAUDE.md and README.md files to understand existing documentation patterns, sections, and conventions before making updates",
+            "title": "Create lua/plugins/lsp/conform.lua with LazyVim Extension Pattern",
+            "description": "Create a new conform.nvim configuration file that extends LazyVim's default formatter configuration using the opts function pattern to merge custom formatters with LazyVim defaults.",
             "dependencies": [],
-            "details": "Use the Read tool to examine /home/sergio/Projects/personal/claude-starter-kit/CLAUDE.md and README.md files. Identify current documentation structure, sections, and formatting patterns. Look for existing references to skills, language configurations, and workflow documentation. Search for any existing migration guides or documentation patterns to follow. Document the current state to ensure new additions integrate seamlessly.",
+            "details": "Create lua/plugins/lsp/conform.lua with ---@type LazySpec annotation. Use opts = function(_, opts) pattern to extend LazyVim's formatters_by_ft table via vim.tbl_deep_extend('force', ...). Include all current formatters: php (pint), blade (blade-formatter), cpp/c (clang_format), go (gofumpt), yaml (yamlfmt), css/html/json/js/jsx/ts/tsx/vue/graphql/less/scss/flow (prettier), and kotlin (ktfmt). Configure ktfmt formatter with append_args = { '--kotlinlang-style' } in opts.formatters table.",
             "status": "pending",
-            "testStrategy": "Verify that analysis captures all major sections of both files, identifies formatting conventions, and documents integration points for new language skills content"
+            "testStrategy": "Open .kt file and save - verify ktfmt formats with kotlinlang-style. Open .yaml file and save - verify yamlfmt runs. Open .ts file and save - verify prettier formats. Check :ConformInfo for configured formatters."
           },
           {
             "id": 2,
-            "title": "Update CLAUDE.md with Language-Specific Skills section",
-            "description": "Add comprehensive Language-Specific Skills section to CLAUDE.md explaining the feature, listing supported languages, and providing usage patterns",
+            "title": "Migrate format_after_save Logic to LazyVim Pattern",
+            "description": "Preserve the custom format_after_save function that handles disable_autoformat flags and node_modules exclusion within the new LazyVim extension conform.lua file.",
             "dependencies": [
               1
             ],
-            "details": "Create a new 'Language-Specific Skills' section in CLAUDE.md after the existing skills documentation. Include explanation of how language skills work, list of available languages (Go, Python, Java, Kotlin, TypeScript), description of skill file structure (SKILL.md, style.md, testing.md, tooling.md, patterns.md, frameworks/), usage patterns for automatic references and direct invocation, and best practices for when to use language skills vs process skills. Ensure proper markdown formatting and internal links to skill directories. Reference the design document at /docs/wip/language-specific-skills/design.md for User Experience patterns and the implementation plan Phase 4, Task 4.3 for specific content requirements.",
+            "details": "Within the opts function in lua/plugins/lsp/conform.lua, set opts.format_after_save to a function(bufnr) that: 1) Returns nil if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat is true, 2) Returns nil if bufname matches '/node_modules/', 3) Otherwise returns { timeout_ms = 500, lsp_format = 'fallback' }. This preserves the existing behavior of skipping formatting for disabled buffers and node_modules files.",
             "status": "pending",
-            "testStrategy": "Validate markdown syntax, verify all internal links resolve correctly, ensure new section integrates with existing documentation flow, test readability and completeness of instructions"
+            "testStrategy": "Open a file in node_modules/ and save - verify no formatting occurs. Set vim.g.disable_autoformat = true, open any file and save - verify no formatting. Reset flag and save - verify formatting resumes."
           },
           {
             "id": 3,
-            "title": "Update README.md Features and Quick Start sections",
-            "description": "Enhance README.md to highlight Language-Specific Development Skills feature and clarify LANGUAGE parameter usage in template-cleanup workflow",
-            "dependencies": [
-              1
-            ],
-            "details": "Update the Features section in README.md to prominently highlight 'Language-Specific Development Skills' with a list of supported languages. Add clear explanation of how the feature works and its benefits. In the Quick Start section, clarify that the LANGUAGE parameter in template-cleanup workflow determines which language skill is included. Add example command showing how to set LANGUAGE parameter. Ensure changes maintain consistency with existing README format and style. Follow implementation plan Phase 4, Task 4.4 specifications for exact content additions.",
+            "title": "Create lua/plugins/lsp/nvim-lint.lua with Disabled State",
+            "description": "Create nvim-lint configuration file that preserves all linter configurations but keeps the plugin disabled as in the original config, using LazyVim spec pattern.",
+            "dependencies": [],
+            "details": "Create lua/plugins/lsp/nvim-lint.lua with ---@type LazySpec annotation and enabled = false. Define linters_by_ft with: javascript/javascriptreact/typescript/typescriptreact (eslint_d), markdown (markdownlint), sh (shellcheck), yaml (yamllint), kotlin (ktlint). Include config function that sets require('lint').linters_by_ft and creates CursorHold/CursorHoldI autocmd calling lint.try_lint(). The plugin stays disabled but configuration is preserved for easy re-enabling.",
             "status": "pending",
-            "testStrategy": "Check markdown rendering, verify feature description is clear and compelling, ensure Quick Start instructions are actionable, validate all examples work correctly"
+            "testStrategy": "Verify nvim-lint does not load by default (:Lazy shows it disabled). Temporarily set enabled = true, open a .sh file with issues - verify shellcheck runs. Check :lua print(vim.inspect(require('lint').linters_by_ft)) shows configured linters."
           },
           {
             "id": 4,
-            "title": "Create migration guide for existing users",
-            "description": "Develop comprehensive migration guide at docs/wip/language-specific-skills/migration.md for users adopting the new language skills feature",
+            "title": "Delete Obsolete conform.lua and nvim-lint.lua Config Files",
+            "description": "Remove the old NvChad-style configuration files from lua/plugins/lsp/configs/ directory after confirming new LazyVim-pattern files are working correctly.",
             "dependencies": [
+              1,
               2,
               3
             ],
-            "details": "Create directory structure docs/wip/language-specific-skills/ if needed. Write migration.md with step-by-step guide including: prerequisites check, instructions for running cleanup workflow on existing repository, manual migration steps if workflow cannot be used, verification steps to confirm successful integration, and rollback procedures if needed. Include code examples showing before/after states. Add troubleshooting section covering common issues like missing language skill, broken links, and workflow failures. Follow the migration guide template outlined in implementation plan Phase 4, Task 4.5.",
+            "details": "Delete lua/plugins/lsp/configs/conform.lua (the old NvPluginSpec format file with formatters_by_ft table at top level). Delete lua/plugins/lsp/configs/nvim-lint.lua (the old NvPluginSpec format file with linters_by_ft table). These are replaced by the new files at lua/plugins/lsp/conform.lua and lua/plugins/lsp/nvim-lint.lua respectively. Verify no other files import or reference these configs paths before deletion.",
             "status": "pending",
-            "testStrategy": "Test migration guide by following steps on a sample existing project, verify all commands work, ensure troubleshooting covers realistic scenarios, validate that guide is complete and reproducible"
+            "testStrategy": "After deletion, restart Neovim and verify no 'module not found' errors. Run :Lazy sync to confirm plugin loading. Test formatting on multiple file types (Kotlin, YAML, TypeScript) to ensure new config is picked up."
           },
           {
             "id": 5,
-            "title": "Add framework extension examples and patterns",
-            "description": "Document framework extension patterns and provide concrete examples for users to follow when extending language skills",
+            "title": "Verify Integration with LazyVim Extras and Update lazyvim.json",
+            "description": "Ensure the new formatter and linter configurations integrate properly with LazyVim's extras system and update lazyvim.json if needed to enable the conform extra.",
             "dependencies": [
+              1,
+              2,
+              3,
               4
             ],
-            "details": "Add a section to migration.md or create a separate frameworks-guide.md documenting how users can extend language skills with framework-specific content. Include examples for common frameworks in each language (e.g., Spring for Java, Django for Python, React for TypeScript). Show directory structure for framework extensions, naming conventions, and how to reference framework content from main skill files. Provide template for creating new framework documentation. Include best practices for maintaining framework extensions. Reference the design document's Framework Extensibility section for architectural guidance.",
+            "details": "Check if LazyVim's lazyvim.plugins.formatting extra is enabled in lazyvim.json - if not present, the standalone conform.lua should work independently. Verify the new conform.lua properly extends LazyVim's defaults when the extra is enabled (formatters should merge, not replace). Test that the ktfmt kotlinlang-style argument is applied correctly by checking :ConformInfo output. Verify format_after_save respects both global and buffer-local disable flags.",
             "status": "pending",
-            "testStrategy": "Verify examples are technically accurate, test that framework extension patterns are clear and followable, ensure examples cover diverse use cases across different languages"
+            "testStrategy": "Run :ConformInfo and verify all custom formatters appear alongside any LazyVim defaults. Open Kotlin file, format, check output uses --kotlinlang-style. Toggle vim.g.disable_autoformat and verify behavior. Check lazyvim.json reflects correct extra configuration."
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Migrate AI Plugin Configurations",
+        "description": "Update AI plugins (CodeCompanion, Copilot, Supermaven) to LazyVim spec pattern while preserving custom adapters (Gemini), keymaps, and model configurations from serpro69/plugins_aux.lua.",
+        "details": "## Implementation Steps\n\n### 1. Update lua/plugins/ai/copilot.lua to extend LazyVim extra\n\n```lua\n---@type LazySpec\nreturn {\n  \"zbirenbaum/copilot.lua\",\n  opts = function(_, opts)\n    -- Extend LazyVim's copilot configuration\n    opts.filetypes = vim.tbl_deep_extend(\"force\", opts.filetypes or {}, {\n      markdown = true,\n      help = true,\n      -- Add any custom filetype overrides\n    })\n    return opts\n  end,\n}\n```\n\n### 2. Update lua/plugins/ai/codecompanion.lua\n\n```lua\n---@type LazySpec\nreturn {\n  \"olimorris/codecompanion.nvim\",\n  enabled = true,\n  event = \"VeryLazy\",\n  dependencies = {\n    \"nvim-lua/plenary.nvim\",\n    \"nvim-treesitter/nvim-treesitter\",\n    \"nvim-telescope/telescope.nvim\",\n    {\n      \"stevearc/dressing.nvim\",\n      opts = {},\n    },\n    {\n      \"HakonHarnes/img-clip.nvim\",\n      opts = {\n        filetypes = {\n          codecompanion = {\n            prompt_for_file_name = false,\n            template = \"[Image]($FILE_PATH)\",\n            use_absolute_path = true,\n          },\n        },\n      },\n    },\n  },\n  opts = function()\n    -- Get AI models from plugins_aux\n    local ai_models = require(\"serpro69.plugins_aux\").ai_models\n    \n    return {\n      adapters = {\n        copilot = function()\n          return require(\"codecompanion.adapters\").extend(\"copilot\", {\n            opts = { stream = false },\n            schema = {\n              model = { default = \"gpt-4o\" },\n            },\n          })\n        end,\n        gemini = function()\n          return require(\"codecompanion.adapters\").extend(\"gemini\", {\n            schema = {\n              model = { default = ai_models.gemini.pro },\n            },\n          })\n        end,\n      },\n      strategies = {\n        chat = { adapter = \"gemini\" },\n        inline = { adapter = \"gemini\" },\n        agent = { adapter = \"gemini\" },\n      },\n      display = {\n        chat = {\n          window = { layout = \"vertical\" },\n        },\n        inline = {\n          diff = {\n            hl_groups = { added = \"DiffAdd\" },\n          },\n        },\n      },\n      opts = {\n        log_level = \"DEBUG\",\n      },\n    }\n  end,\n  init = function()\n    vim.cmd([[cab cc CodeCompanion]])\n    require(\"legendary\").keymaps({\n      {\n        itemgroup = \"CodeCompanion\",\n        icon = \"\",\n        description = \"Use the power of AI...\",\n        keymaps = {\n          { \"<C-a>\", \"<cmd>CodeCompanionActions<CR>\", description = \"Open the CodeCompanion action picker\", mode = { \"n\", \"v\" } },\n          { \"<LocalLeader>a\", \"<cmd>CodeCompanionToggle<CR>\", description = \"Open CodeCompanion chat prompt\", mode = { \"n\", \"v\" } },\n          { \"ga\", \"<cmd>CodeCompanionAdd<CR>\", description = \"Add selected text to CodeCompanion\", mode = { \"n\", \"v\" } },\n        },\n      },\n    })\n  end,\n}\n```\n\n### 3. Update lua/plugins/ai/supermaven.lua\n\n```lua\n---@type LazySpec  \nreturn {\n  \"supermaven-inc/supermaven-nvim\",\n  event = \"InsertEnter\",\n  cmd = { \"SupermavenUseFree\", \"SupermavenUsePro\" },\n  opts = {\n    keymaps = {\n      accept_suggestion = nil, -- handled by blink.cmp\n    },\n    disable_inline_completion = vim.g.ai_cmp,\n    ignore_filetypes = { \"bigfile\", \"snacks_input\", \"snacks_notif\" },\n  },\n}\n```\n\n### 4. Preserve serpro69/plugins_aux.lua\n\nKeep this file with AI model definitions:\n```lua\nM.ai_models = {\n  claude = {\n    sonnet_3_5 = \"claude-3.5-sonnet\",\n    sonnet_3_7 = \"claude-3.7-sonnet\",\n  },\n  gemini = {\n    flash = \"gemini-2.5-flash\",\n    pro = \"gemini-2.5-pro\",\n  },\n}\n```\n\n### 5. Handle other AI plugins\n\n- avante.lua - Update to LazySpec, keep nvim-tree integration from plugins_aux.lua\n- mcphub.lua - Update to LazySpec\n- neocodeium.lua - Update or delete if not used\n- windsurf.lua - Update or delete if not used\n- sidekick.lua - Update or delete if not used\n- opencode.lua/opencode-tui.lua - Update to LazySpec",
+        "testStrategy": "1. Test Copilot activation: `:Copilot status`\n2. Test CodeCompanion chat: `<LocalLeader>a` should open chat\n3. Test CodeCompanion with Gemini adapter: Send a message and verify response\n4. Test CodeCompanion actions: `<C-a>` should show action picker\n5. Test Supermaven in insert mode (if configured)\n6. Verify AI model definitions load from plugins_aux.lua\n7. Test Avante integration with nvim-tree: `oa` keymap should add file to Avante",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update Copilot Plugin to LazyVim Spec Pattern",
+            "description": "Convert lua/plugins/ai/copilot.lua from NvPluginSpec to LazySpec format that extends LazyVim's copilot extra configuration",
+            "dependencies": [],
+            "details": "Update lua/plugins/ai/copilot.lua to use `---@type LazySpec` annotation. Restructure to extend LazyVim's copilot configuration using opts function pattern. Preserve existing custom filetypes filter (blocking evergreen-dissemination, norsk directories, hidden files, .tfvars), custom keymaps registered via legendary.nvim (<C-a> accept, <C-x> dismiss, <C-\\> panel), and copilot_model='gpt-4o-copilot'. Keep panel and suggestion modules enabled with auto_trigger. Move keymap configuration from init() to keys table where appropriate. Maintain the CopilotToggle command. Update copilot-cmp.lua dependency to LazySpec if retained.",
+            "status": "pending",
+            "testStrategy": "1. Run `:Copilot status` to verify activation\n2. Test custom keymaps: <C-a> accepts suggestion, <C-x> dismisses, <C-\\> opens panel\n3. Open a .tfvars file and verify Copilot is disabled\n4. Open file in blocked directory (if accessible) to verify filtering\n5. Run `:CopilotToggle` to verify command works"
+          },
+          {
+            "id": 2,
+            "title": "Update CodeCompanion Plugin to LazyVim Spec Pattern",
+            "description": "Convert lua/plugins/ai/codecompanion.lua from NvPluginSpec to LazySpec format while preserving Gemini adapter and custom configurations",
+            "dependencies": [],
+            "details": "Update codecompanion.lua to use `---@type LazySpec` annotation. Preserve the HTTP adapters configuration with copilot adapter (stream=false, model=gpt-4o) and gemini adapter (using ai_models.gemini.pro from serpro69/plugins_aux.lua). Maintain strategies configuration (chat, inline, agent all using gemini adapter). Keep display settings (vertical chat layout, DiffAdd highlight for inline diffs). Preserve dependencies (plenary, treesitter, telescope, dressing.nvim, img-clip.nvim). Keep legendary.nvim keymaps (<C-a> actions, <LocalLeader>a toggle, ga add). Retain vim command abbreviation `cab cc CodeCompanion`. Keep log_level=DEBUG. Consider uncommenting mcphub extension if mcphub.lua is enabled.",
+            "status": "pending",
+            "testStrategy": "1. Test CodeCompanion chat: `<LocalLeader>a` should open vertical chat window\n2. Send a message and verify response comes from Gemini adapter\n3. Test `<C-a>` opens action picker in normal and visual modes\n4. Test `ga` in visual mode adds selected text\n5. Type `:cc` and verify expands to `:CodeCompanion`\n6. Check adapter fallback by testing with copilot if gemini fails"
+          },
+          {
+            "id": 3,
+            "title": "Update Supermaven Plugin to LazyVim Spec Pattern",
+            "description": "Convert lua/plugins/ai/supermaven.lua from NvPluginSpec to LazySpec format with LazyVim-compatible keymaps",
+            "dependencies": [],
+            "details": "Update supermaven.lua to use `---@type LazySpec` annotation. Change event from BufReadPost/BufNewFile to InsertEnter for better lazy loading. Update keymaps configuration: set accept_suggestion to nil if integrating with blink.cmp (check vim.g.ai_cmp flag). Preserve custom keymaps (accept_suggestion=<A-f>, accept_word=<A-w>). Add ignore_filetypes list for bigfile, snacks_input, snacks_notif. Add cmd entry for SupermavenUseFree and SupermavenUsePro commands. Consider cond vs enabled flag for conditional loading (currently cond=false).",
+            "status": "pending",
+            "testStrategy": "1. Enable plugin by changing cond=true or enabled=true\n2. Enter insert mode and verify Supermaven suggestions appear\n3. Test <A-f> accepts full suggestion\n4. Test <A-w> accepts word suggestion\n5. Open bigfile and verify Supermaven is disabled\n6. Run `:SupermavenUseFree` to verify command works"
+          },
+          {
+            "id": 4,
+            "title": "Update Avante Plugin to LazyVim Spec Pattern with nvim-tree Integration",
+            "description": "Convert lua/plugins/ai/avante.lua from NvPluginSpec to LazySpec format while ensuring nvim-tree integration keymaps from plugins_aux.lua work",
+            "dependencies": [
+              1
+            ],
+            "details": "Update avante.lua to use `---@type LazySpec` annotation. Preserve provider=gemini configuration with ai_models.gemini.pro from plugins_aux.lua. Keep behaviour.enable_token_counting=false. Maintain window width (0.2*columns) and sidebar mappings (close=q). Keep all dependencies (dressing, plenary, nui, telescope, img-clip). Ensure the nvim-tree 'oa' keymap from plugins_aux.lua works (adds file to Avante selected files). The keymap uses avante.utils.relative_path and avante.api.ask. Verify the file_selector:add_selected_file and remove_selected_file APIs are called correctly. Consider if the plugin should remain disabled (enabled=false) or be activated.",
+            "status": "pending",
+            "testStrategy": "1. Enable plugin and open Avante with provider command\n2. Verify Gemini model is used (check ai_models.gemini.pro)\n3. In nvim-tree, navigate to a file and press 'oa'\n4. Verify file appears in Avante sidebar selected files\n5. Test close mapping 'q' in sidebar\n6. Verify window width is approximately 20% of screen"
+          },
+          {
+            "id": 5,
+            "title": "Update Remaining AI Plugins and Preserve plugins_aux.lua",
+            "description": "Update mcphub.lua, opencode.lua, opencode-tui.lua to LazySpec pattern; evaluate and update/delete neocodeium.lua, windsurf.lua, sidekick.lua based on usage",
+            "dependencies": [
+              2
+            ],
+            "details": "Update mcphub.lua to LazySpec (simple plugin, keep use_bundled_binary). Update opencode.lua to LazySpec while preserving extensive keymap configuration (toggle, diff operations, permission handling, input/output window keymaps). Update opencode-tui.lua to LazySpec (currently disabled). For neocodeium.lua: if not used (enabled=false), consider deleting or keep with LazySpec; has custom keymaps for accept/word/line/cycle/clear. For windsurf.lua: if not used, consider deleting; uses Exafunction/windsurf.nvim with nvim-cmp dependency. For sidekick.lua: if not used, consider deleting; has folke/sidekick.nvim with CLI toggle keymaps. Preserve serpro69/plugins_aux.lua with ai_models table (claude sonnet versions, gemini flash/pro models) and nvim_tree keymaps function - this is required by codecompanion.lua and avante.lua.",
+            "status": "pending",
+            "testStrategy": "1. Verify plugins_aux.lua ai_models table is accessible: `lua print(vim.inspect(require('serpro69.plugins_aux').ai_models))`\n2. If mcphub enabled: test `:MCPHub` command\n3. If opencode enabled: test `<leader>aa` toggle, `<leader>ai` input window\n4. For disabled plugins, verify they don't cause load errors\n5. Run `:checkhealth` to verify no plugin errors\n6. Verify nvim-tree integration works with plugins_aux keymaps"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Migrate Custom Modules and Notifications",
+        "description": "Migrate serpro69/notify.lua (LSP/DAP progress notifications with spinners), serpro69/commands.lua (ObsidianFormatAIOutput), and integrate custom notification handling.",
+        "details": "## Implementation Steps\n\n### 1. Migrate serpro69/notify.lua\n\nThis file provides custom LSP progress notifications with spinner animations. LazyVim uses Snacks.notifier by default, but we can keep nvim-notify for compatibility.\n\n**Option A: Keep nvim-notify and custom notifications**\n\nCreate lua/plugins/ui/nvim-notify.lua:\n\n```lua\n---@type LazySpec\nreturn {\n  \"rcarriga/nvim-notify\",\n  opts = {\n    timeout = 3000,\n    max_height = function()\n      return math.floor(vim.o.lines * 0.75)\n    end,\n    max_width = function()\n      return math.floor(vim.o.columns * 0.75)\n    end,\n    on_open = function(win)\n      vim.api.nvim_win_set_config(win, { zindex = 100 })\n    end,\n  },\n  init = function()\n    -- Replace default notify\n    vim.notify = require(\"notify\")\n  end,\n}\n```\n\nThen load the custom LSP progress handler in config/autocmds.lua or keep in serpro69/notify.lua:\n- LSP `$/progress` handler with spinner animation\n- Macro recording notifications\n- Custom notification styling\n\n**Option B: Use Snacks.notifier (LazyVim default)**\n\nMigrate spinner logic to work with Snacks or accept simpler notifications.\n\n### 2. Migrate serpro69/commands.lua\n\nMove ObsidianFormatAIOutput command to config/autocmds.lua or keep in separate file:\n\n```lua\n-- In lua/config/autocmds.lua or serpro69/commands.lua\nvim.api.nvim_create_user_command(\"ObsidianFormatAIOutput\", function(opts)\n  local start_line = opts.line1\n  local end_line = opts.line2\n\n  if not opts.range then\n    start_line = 1\n    end_line = vim.fn.line(\"$\")\n  end\n\n  -- Remove extra spaces after list markers\n  vim.cmd(string.format(\"%d,%ds/\\\\v^(\\\\s*[*|-]|\\\\d+\\\\.?|\\\\w+\\\\.?)\\\\s+/\\\\1 /g\", start_line, end_line))\n  -- Prepend \"> \" to each line\n  vim.cmd(string.format(\"%d,%ds/^/> /g\", start_line, end_line))\nend, {\n  range = true,\n  desc = \"Format markdown output from AI for obsidian note\",\n})\n```\n\n### 3. Update init.lua or config to load modules\n\nIn config/autocmds.lua or a custom loader:\n\n```lua\n-- Load custom commands\nif vim.fn.isdirectory(vim.fn.stdpath(\"config\") .. \"/lua/serpro69\") == 1 then\n  require(\"serpro69.commands\")\n  require(\"serpro69.notify\")\nend\n```\n\n### 4. Preserve NvChad notification integration\n\nIf using NvChad UI mode, notifications work with nvim-notify.\nIf using LazyVim UI, consider whether to keep nvim-notify or migrate to Snacks.\n\n### Files to keep/migrate:\n- lua/serpro69/notify.lua - LSP progress with spinners, macro notifications\n- lua/serpro69/commands.lua - ObsidianFormatAIOutput command\n- lua/core/commands.lua - Other custom commands\n- lua/core/serpro69/autocommands.lua - Custom autocommands",
+        "testStrategy": "1. Test LSP progress notifications:\n   - Open a large project\n   - Observe LSP indexing shows spinner animation\n   - Verify progress percentage updates\n2. Test macro recording notifications:\n   - Start recording macro `qa`\n   - Verify notification shows 'recording: @a'\n   - Stop recording `q`\n   - Verify notification shows 'ended: @a'\n3. Test ObsidianFormatAIOutput command:\n   - Open markdown file with AI output\n   - Select text and run `:ObsidianFormatAIOutput`\n   - Verify lines are prefixed with '> '\n4. Test notification styling and transparency handling",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          7,
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update nvim-notify plugin configuration for LazyVim compatibility",
+            "description": "Refactor lua/plugins/ui/nvim-notify.lua to use LazyVim extension pattern and remove NvChad-specific dependencies like base46 and nvconfig.",
+            "dependencies": [],
+            "details": "Update lua/plugins/ui/nvim-notify.lua to use LazyVim spec pattern:\n1. Change from NvPluginSpec to LazySpec type annotation\n2. Remove base46 transparency check and nvconfig dependency (lines 22-27)\n3. Remove core.messages random startup message logic (lines 31-36)\n4. Add max_height and max_width functions as shown in task details\n5. Update on_open to set both focusable=false and zindex=100\n6. Keep 'VeryLazy' event loading for optimal startup time\n7. Ensure vim.notify = require('notify') is preserved in init or config function",
+            "status": "pending",
+            "testStrategy": "Open Neovim and verify notifications appear correctly with proper styling. Check that transparency works without base46 dependency. Test notification window is non-focusable by attempting to focus it with mouse/keyboard."
+          },
+          {
+            "id": 2,
+            "title": "Migrate LSP progress handler with spinner animations",
+            "description": "Move the LSP $/progress handler from serpro69/notify.lua to a dedicated module that works independently of the main nvim-notify plugin setup.",
+            "dependencies": [
+              1
+            ],
+            "details": "Migrate lua/serpro69/notify.lua LSP progress functionality:\n1. Create lua/config/lsp-progress.lua (or keep in serpro69/notify.lua)\n2. Preserve the client_notifs tracking system (lines 13-26)\n3. Keep spinner_frames animation array (line 28)\n4. Preserve update_spinner function with vim.defer_fn 100ms loop (lines 30-51)\n5. Keep format_title and format_message helpers (lines 53-59)\n6. Migrate vim.lsp.handlers['$/progress'] override (lines 64-107) maintaining begin/report/end handling\n7. Ensure proper cleanup of spinner and message on 'end' event\n8. Load this module from config/autocmds.lua or init sequence after nvim-notify is loaded",
+            "status": "pending",
+            "testStrategy": "Open a project with LSP (e.g., TypeScript project). Observe LSP indexing shows spinner animation with ⣾⣽⣻⢿⡿⣟⣯⣷ frames. Verify progress percentage updates in real-time. Confirm notifications clean up properly after LSP initialization completes."
+          },
+          {
+            "id": 3,
+            "title": "Migrate macro recording notifications with spinner",
+            "description": "Move macro notification functions (notify_macro_start/end) and the RecordingEnter/RecordingLeave autocommands to the new configuration structure.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Migrate macro notification system from serpro69/notify.lua:\n1. Keep M.options with message_start='recording: @', message_end='ended: @', icons (lines 112-117)\n2. Preserve notify_macro_start function using shared spinner system (lines 122-136)\n3. Preserve notify_macro_end function with proper cleanup (lines 139-157)\n4. Keep M.setup function for option customization (lines 160-163)\n5. Migrate RecordingEnter/RecordingLeave autocommands from lua/core/serpro69/autocommands.lua (lines 59-79) to lua/config/autocmds.lua\n6. Update require path in autocommands to match new module location\n7. Ensure the module returns M for external access to notification functions",
+            "status": "pending",
+            "testStrategy": "Start recording macro with 'qa'. Verify notification shows 'recording: @a' with spinner animation. Stop recording with 'q'. Verify notification shows 'ended: @a' and spinner stops. Test multiple sequential macro recordings to ensure cleanup works."
+          },
+          {
+            "id": 4,
+            "title": "Migrate ObsidianFormatAIOutput command to config structure",
+            "description": "Move the ObsidianFormatAIOutput command from serpro69/commands.lua to config/autocmds.lua or a dedicated commands file in the LazyVim structure.",
+            "dependencies": [],
+            "details": "Migrate lua/serpro69/commands.lua to LazyVim structure:\n1. Create lua/config/commands.lua or add to lua/config/autocmds.lua\n2. Copy ObsidianFormatAIOutput command (all 31 lines from serpro69/commands.lua)\n3. Preserve range=true option for visual selection support\n4. Keep both regex substitutions: normalizing list marker spacing and prepending '> '\n5. Maintain the fallback to whole file when no range selected (lines 6-11)\n6. Update init.lua or config loader to require this new module\n7. Remove the require('serpro69.commands') from init.lua line 13 after migration\n8. Consider adding additional Obsidian-related commands if found in other files",
+            "status": "pending",
+            "testStrategy": "Open a markdown file with AI output containing lists (numbered and bulleted). Select a range and run :ObsidianFormatAIOutput. Verify list markers normalized to single space and all lines prefixed with '> '. Test without selection to verify whole-file processing. Check regex handles indented lists correctly."
+          },
+          {
+            "id": 5,
+            "title": "Update init.lua module loading for migrated components",
+            "description": "Refactor init.lua to load migrated modules from their new LazyVim-compatible locations and ensure proper initialization order.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Update init.lua to reflect migrated module locations:\n1. Remove or update require('serpro69.commands') on line 13\n2. Remove or update require('serpro69.notify') on line 68\n3. Remove or update require('core.serpro69.autocommands') on line 67 if autocommands moved\n4. Add new requires for lua/config/commands.lua, lua/config/autocmds.lua, lua/config/lsp-progress.lua\n5. Ensure notification modules load after lazy.nvim setup and nvim-notify plugin\n6. Add conditional check for serpro69 directory existence as backup: vim.fn.isdirectory(vim.fn.stdpath('config') .. '/lua/serpro69')\n7. Document the loading sequence with comments for future maintenance\n8. Test that all modules load without errors on fresh Neovim start",
+            "status": "pending",
+            "testStrategy": "Restart Neovim and verify no module loading errors in :messages. Test all migrated functionality works: LSP progress notifications, macro recording notifications, ObsidianFormatAIOutput command. Check :checkhealth for any warnings about missing modules."
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Migrate Writing and Utility Plugins",
+        "description": "Migrate Obsidian.nvim (workspaces, daily notes, templates) and pomo.nvim (pomodoro timer with statusline integration) to new plugin structure.",
+        "details": "## Implementation Steps\n\n### 1. Move and update lua/plugins/lang/obsidian.lua\n\nMove from lua/plugins/obsidian.lua to lua/plugins/lang/obsidian.lua:\n\n```lua\n---@type LazySpec\nreturn {\n  \"epwalsh/obsidian.nvim\",\n  version = \"*\",\n  ft = \"markdown\",\n  event = {\n    \"BufReadPre \" .. vim.fn.expand(\"~\") .. \"/obsidian/**.md\",\n    \"BufNewFile \" .. vim.fn.expand(\"~\") .. \"/obsidian/**.md\",\n  },\n  dependencies = {\n    \"nvim-lua/plenary.nvim\",\n    \"hrsh7th/nvim-cmp\", -- or saghen/blink.cmp for LazyVim\n    \"nvim-telescope/telescope.nvim\",\n    \"nvim-treesitter/nvim-treesitter\",\n  },\n  opts = {\n    workspaces = {\n      {\n        name = \"🌌 evergreen\",\n        path = \"~/obsidian/evergreen-dissemination\",\n      },\n      {\n        name = \"🇳🇴 norsk\",\n        path = \"~/obsidian/norsk\",\n      },\n    },\n    daily_notes = {\n      folder = \"100_Logbook/110_Daily/\" .. os.date(\"%Y\") .. \"/\" .. os.date(\"%m\"),\n      date_format = \"%Y-%m-%d\",\n      default_tags = { \"daylog\" },\n      template = \"000_Infra/002_Templates/periodic_note/today.md\",\n    },\n    new_notes_location = \"010_Black_Hole\",\n    disable_frontmatter = true,\n    templates = {\n      folder = \"000_Infra/002_Templates\",\n      date_format = \"%Y-%m-%d\",\n      time_format = \"%H:%M\",\n      substitutions = {},\n    },\n  },\n}\n```\n\n### 2. Move and update lua/plugins/util/pomo.lua\n\nMove from lua/plugins/pomo.lua to lua/plugins/util/pomo.lua:\n\n```lua\n---@type LazySpec\nreturn {\n  \"epwalsh/pomo.nvim\",\n  version = \"*\",\n  lazy = true,\n  cmd = { \"TimerStart\", \"TimerRepeat\", \"TimerSession\" },\n  dependencies = {\n    \"rcarriga/nvim-notify\",\n  },\n  opts = {\n    sessions = {\n      pomodoro = {\n        { name = \"Work\", duration = \"50m\" },\n        { name = \"Short Break\", duration = \"10m\" },\n        { name = \"Work\", duration = \"50m\" },\n        { name = \"Short Break\", duration = \"10m\" },\n        { name = \"Work\", duration = \"50m\" },\n        { name = \"Short Break\", duration = \"10m\" },\n        { name = \"Work\", duration = \"50m\" },\n        { name = \"Long Break\", duration = \"30m\" },\n      },\n    },\n  },\n}\n```\n\n### 3. Update statusline pomo_timer integration\n\nThe pomo_timer statusline module in serpro69/chadrc_aux.lua needs to stay working:\n\n```lua\npomo_timer = function()\n  local ok, pomo = pcall(require, \"pomo\")\n  if not ok then\n    return \"\"\n  end\n\n  local timer = pomo.get_first_to_finish()\n  if timer == nil then\n    return \"\"\n  end\n\n  return \"󰄉 \" .. tostring(timer)\nend,\n```\n\nThis module is used in chadrc.lua statusline.order configuration.\n\n### 4. Handle blink.cmp vs nvim-cmp for Obsidian\n\nIf using LazyVim's blink.cmp (default), update Obsidian dependency:\n- Remove nvim-cmp dependency\n- Add blink.cmp as dependency if Obsidian needs completion source\n\n### 5. Move other root plugins\n\n- lua/plugins/yaml.lua → lua/plugins/lang/yaml.lua\n- lua/plugins/legendary.lua → lua/plugins/util/legendary.lua  \n- lua/plugins/better-escape.lua → lua/plugins/editor/better-escape.lua\n- lua/plugins/actions-preview.lua → lua/plugins/lsp/actions-preview.lua",
+        "testStrategy": "1. Test Obsidian workspace switching:\n   - Run `:ObsidianWorkspace` and select workspace\n   - Verify correct vault loads\n2. Test Obsidian daily notes:\n   - Run `:ObsidianToday`\n   - Verify note created in correct folder with correct date format\n3. Test Obsidian templates:\n   - Run `:ObsidianTemplate`\n   - Verify templates from configured folder are available\n4. Test Pomodoro timer:\n   - Run `:TimerStart 1m test`\n   - Verify notification shows timer\n   - Verify statusline shows timer countdown (if using NvChad UI)\n5. Test Pomodoro session:\n   - Run `:TimerSession pomodoro`\n   - Verify session starts with Work timer",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Move obsidian.nvim to lua/plugins/writing/ with LazyVim spec updates",
+            "description": "Move obsidian.lua from lua/plugins/ root to lua/plugins/writing/obsidian.lua and update to LazyVim spec pattern with correct type annotation and completion dependency handling.",
+            "dependencies": [],
+            "details": "1. Move file from lua/plugins/obsidian.lua to lua/plugins/writing/obsidian.lua\n2. Change type annotation from @type NvPluginSpec to @type LazySpec\n3. Update nvim-cmp dependency to conditionally support blink.cmp (since blink-cmp.lua shows the project uses blink.cmp as primary completion)\n4. Either remove hrsh7th/nvim-cmp dependency or replace with saghen/blink.cmp depending on obsidian.nvim compatibility\n5. Keep existing opts (workspaces, daily_notes, templates, disable_frontmatter) unchanged\n6. Verify the file loads correctly via lazy.nvim after move",
+            "status": "pending",
+            "testStrategy": "1. Run :Lazy to verify obsidian.nvim loads without errors\n2. Open a markdown file in ~/obsidian/ to trigger lazy loading\n3. Run :ObsidianWorkspace and verify both workspaces (evergreen, norsk) are available\n4. Run :ObsidianToday and verify daily note is created in correct folder with correct date format"
+          },
+          {
+            "id": 2,
+            "title": "Move pomo.nvim to lua/plugins/util/ with LazyVim spec updates",
+            "description": "Move pomo.lua from lua/plugins/ root to lua/plugins/util/pomo.lua (create util directory if needed) and update to LazyVim spec pattern.",
+            "dependencies": [],
+            "details": "1. Create lua/plugins/util/ directory if it doesn't exist\n2. Move file from lua/plugins/pomo.lua to lua/plugins/util/pomo.lua\n3. Change type annotation from @type NvPluginSpec to @type LazySpec\n4. Keep existing opts (sessions with pomodoro timings) unchanged\n5. Keep dependency on rcarriga/nvim-notify\n6. Update lua/plugins/init.lua to add { import = 'plugins.util' } to the imports list",
+            "status": "pending",
+            "testStrategy": "1. Run :Lazy to verify pomo.nvim loads without errors\n2. Run :TimerStart 1m to start a 1-minute test timer\n3. Run :TimerSession pomodoro to verify the custom session configuration works\n4. Verify the timer shows in statusline (next subtask validates this)"
+          },
+          {
+            "id": 3,
+            "title": "Verify and maintain pomo_timer statusline integration",
+            "description": "Ensure the pomo_timer statusline module in serpro69/chadrc_aux.lua continues to work correctly after the plugin move, verifying the statusline integration in chadrc.lua.",
+            "dependencies": [
+              2
+            ],
+            "details": "1. Review lua/serpro69/chadrc_aux.lua:190-202 - the pomo_timer function that displays timer in statusline\n2. Verify the module uses pcall to safely load pomo module and handles missing plugin gracefully\n3. Confirm the statusline order in lua/chadrc.lua:41-54 includes 'pomo_timer' in the correct position\n4. Test that the timer icon (󰄉) displays correctly when a timer is active\n5. No code changes should be needed if the plugin move is done correctly - this is validation",
+            "status": "pending",
+            "testStrategy": "1. Start a timer with :TimerStart 5m\n2. Check statusline shows 󰄉 followed by timer countdown\n3. Wait for timer to complete or cancel it, verify statusline returns to normal\n4. Verify statusline doesn't show anything when no timer is running"
+          },
+          {
+            "id": 4,
+            "title": "Move remaining root plugins to appropriate category directories",
+            "description": "Move yaml.lua, legendary.lua, better-escape.lua, and actions-preview.lua from lua/plugins/ root to their appropriate category directories with LazyVim spec updates.",
+            "dependencies": [],
+            "details": "1. Move lua/plugins/yaml.lua → lua/plugins/langs/yaml.lua (langs directory exists)\n   - Update @type NvPluginSpec to @type LazySpec\n   - Keep ft and dependencies unchanged\n\n2. Move lua/plugins/legendary.lua → lua/plugins/util/legendary.lua\n   - Update type annotation\n   - Keep priority, lazy=false, and init function unchanged\n\n3. Move lua/plugins/better-escape.lua → lua/plugins/editing/better-escape.lua (editing directory exists)\n   - Update type annotation\n   - Keep event and config unchanged\n\n4. Move lua/plugins/actions-preview.lua → lua/plugins/lsp/actions-preview.lua\n   - Update type annotation\n   - Keep init, config, and event unchanged\n\n5. Ensure all files are deleted from original location after move",
+            "status": "pending",
+            "testStrategy": "1. Run :Lazy and verify all four plugins load without errors\n2. Open a YAML file and verify yaml.nvim functionality\n3. Run :Legendary to verify legendary.nvim works\n4. Enter insert mode and quickly press jk to verify better-escape.nvim works\n5. Open a file with LSP, trigger code action (leader-lc) to verify actions-preview.nvim works"
+          },
+          {
+            "id": 5,
+            "title": "Update plugins/init.lua and validate complete plugin migration",
+            "description": "Update lua/plugins/init.lua to import the new util directory and perform final validation that all migrated plugins load correctly with no orphaned files.",
+            "dependencies": [
+              1,
+              2,
+              4
+            ],
+            "details": "1. Edit lua/plugins/init.lua to add { import = 'plugins.util' } to the imports list if not already present\n2. Verify lua/plugins/ root only contains init.lua (no orphaned plugin files)\n3. Run :checkhealth to verify no configuration errors\n4. Run :Lazy sync to ensure all plugins are properly synced\n5. Verify lazy-lock.json is not manually modified (let :Lazy commands handle it)\n6. Test a fresh Neovim startup to ensure all plugins load correctly\n7. Verify serpro69/commands.lua ObsidianFormatAIOutput command still works (depends on vim.cmd, not plugin move)",
+            "status": "pending",
+            "testStrategy": "1. Run :Lazy and verify all plugins from moved files appear correctly\n2. Run :messages to check for any startup errors\n3. Run ls lua/plugins/*.lua to verify only init.lua remains at root level\n4. Test ObsidianFormatAIOutput command in a markdown buffer with AI output\n5. Open various file types to trigger lazy loading and verify no errors"
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Migrate Editor and Navigation Plugins",
+        "description": "Update nvim-tree (with Avante integration keymaps), flash.nvim (custom labels), and other editor plugins to LazyVim extension patterns.",
+        "details": "## Implementation Steps\n\n### 1. Create lua/plugins/editor/nvim-tree.lua\n\nMove from navigation/ and integrate Avante keymaps from plugins_aux.lua:\n\n```lua\n---@type LazySpec\nreturn {\n  \"nvim-tree/nvim-tree.lua\",\n  cmd = { \"NvimTreeToggle\", \"NvimTreeFocus\", \"NvimTreeFindFile\" },\n  keys = {\n    { \"<leader>e\", \"<cmd>NvimTreeToggle<cr>\", desc = \"Explorer (nvim-tree)\" },\n  },\n  opts = {\n    -- Your existing opts\n  },\n  config = function(_, opts)\n    local api = require(\"nvim-tree.api\")\n    \n    -- Custom on_attach with Avante integration\n    opts.on_attach = function(bufnr)\n      local function opts_fn(desc)\n        return { desc = \"nvim-tree: \" .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }\n      end\n      \n      -- Apply keymaps from plugins_aux.lua\n      require(\"serpro69.plugins_aux\").keymaps.nvim_tree(api, opts_fn, bufnr)\n    end\n    \n    require(\"nvim-tree\").setup(opts)\n  end,\n}\n```\n\n### 2. Create lua/plugins/editor/flash.lua (extending LazyVim extra)\n\n```lua\n---@type LazySpec\nreturn {\n  \"folke/flash.nvim\",\n  opts = function(_, opts)\n    -- Extend LazyVim's flash configuration\n    opts.labels = \"asdfghjklqwertyuiopzxcvbnm\" -- Custom labels if different\n    opts.search = vim.tbl_deep_extend(\"force\", opts.search or {}, {\n      -- Custom search settings\n    })\n    return opts\n  end,\n}\n```\n\n### 3. Handle other editor plugins\n\n**better-escape.lua** → editor/better-escape.lua:\n```lua\n---@type LazySpec\nreturn {\n  \"max397574/better-escape.nvim\",\n  event = \"InsertEnter\",\n  opts = {\n    -- Existing options\n  },\n}\n```\n\n**legendary.lua** → util/legendary.lua:\n```lua\n---@type LazySpec\nreturn {\n  \"mrjones2014/legendary.nvim\",\n  priority = 10000,\n  lazy = false,\n  opts = {\n    -- Existing options\n  },\n}\n```\n\n### 4. Handle LazyVim's neo-tree vs nvim-tree\n\nLazyVim uses neo-tree by default. Options:\n\n**Option A: Disable neo-tree, use nvim-tree**\n```lua\n-- In lua/plugins/editor/init.lua or nvim-tree.lua\n{ \"nvim-neo-tree/neo-tree.nvim\", enabled = false },\n```\n\n**Option B: Use neo-tree, migrate nvim-tree config**\nConvert nvim-tree Avante keymaps to neo-tree equivalents.\n\n### 5. Delete obsolete navigation plugins\n\nThese are handled by LazyVim extras:\n- telescope.lua (use LazyVim's telescope config)\n- flash.lua base config (extend instead)\n- cinnamon.lua (smooth scrolling - evaluate if needed)\n- project.lua (use LazyVim project extra)\n- todo-comments.lua (use LazyVim default)\n\n### 6. Preserve custom treesitter additions\n\nFrom plugins/core/nvim-treesitter.lua, extend LazyVim's treesitter:\n\n```lua\n---@type LazySpec\nreturn {\n  \"nvim-treesitter/nvim-treesitter\",\n  opts = function(_, opts)\n    -- Add custom parsers\n    vim.list_extend(opts.ensure_installed or {}, {\n      \"go\", \"hcl\", \"kotlin\", \"make\", \"terraform\", \"twig\", \"yaml\",\n    })\n    return opts\n  end,\n}\n```",
+        "testStrategy": "1. Test nvim-tree opens and navigates correctly\n2. Test Avante integration in nvim-tree:\n   - Navigate to file in nvim-tree\n   - Press `oa` to add to Avante selected files\n   - Verify file appears in Avante sidebar\n3. Test ARIA navigation in nvim-tree:\n   - `h` collapses/goes to parent\n   - `l` expands/enters\n4. Test Flash.nvim search:\n   - Press `s` in normal mode\n   - Type search characters\n   - Verify labels appear correctly\n5. Test better-escape:\n   - In insert mode, press `jj` or `jk`\n   - Verify exits to normal mode\n6. Test Legendary command palette: `:Legendary`",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create editor directory and migrate nvim-tree with Avante integration",
+            "description": "Create lua/plugins/editor/ directory, move nvim-tree.lua from navigation/, update to LazyVim spec pattern while preserving Avante integration keymaps from serpro69/plugins_aux.lua and ARIA navigation.",
+            "dependencies": [],
+            "details": "1. Create lua/plugins/editor/ directory\n2. Move lua/plugins/navigation/nvim-tree.lua to lua/plugins/editor/nvim-tree.lua\n3. Update spec type annotation from NvPluginSpec to LazySpec\n4. Preserve existing on_attach function that calls serpro69.plugins_aux.keymaps.nvim_tree() for Avante file selection (oa keymap) and ARIA navigation (h/l/arrows)\n5. Disable neo-tree if LazyVim enables it by default: { \"nvim-neo-tree/neo-tree.nvim\", enabled = false }\n6. Keep cmd triggers: NvimTreeToggle, NvimTreeFocus, NvimTreeFindFile\n7. Preserve custom view, renderer, git, and diagnostics options",
+            "status": "pending",
+            "testStrategy": "1. Test nvim-tree opens with <leader>e\n2. Test Avante integration: navigate to file, press 'oa' to add to Avante selected files, verify file appears in Avante sidebar\n3. Test ARIA navigation: 'h' collapses/goes to parent, 'l' opens node\n4. Verify neo-tree is disabled if present"
+          },
+          {
+            "id": 2,
+            "title": "Migrate flash.nvim to LazyVim extension pattern",
+            "description": "Move flash.lua from navigation/ to editor/, convert to LazyVim extension pattern preserving custom labels (sfghjklqwetuzbnm) and custom keymaps for jump, treesitter, and remote operations.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Move lua/plugins/navigation/flash.lua to lua/plugins/editor/flash.lua\n2. Update spec to extend LazyVim's flash configuration using opts function pattern\n3. Preserve custom labels: \"sfghjklqwetuzbnm\" (excludes common vim keys)\n4. Maintain search.multi_window, search.mode=\"exact\", search.incremental settings\n5. Keep custom keymaps: <leader>jj (jump), <leader>jt (treesitter), r (remote in operator-pending), R (treesitter_search)\n6. Preserve modes.search and modes.char configurations with backdrop/highlight settings\n7. Update type annotation from NvPluginSpec to LazySpec",
+            "status": "pending",
+            "testStrategy": "1. Test flash jump with <leader>jj - labels should be 'sfghjklqwetuzbnm'\n2. Test treesitter selection with <leader>jt\n3. Test remote operation with 'r' in operator-pending mode\n4. Test search mode integration with / search\n5. Verify char mode works with f/F/t/T"
+          },
+          {
+            "id": 3,
+            "title": "Migrate supporting editor plugins (better-escape, legendary)",
+            "description": "Move better-escape.lua to editor/ and legendary.lua to util/, update both to LazyVim spec pattern while preserving lazy-loading configuration and legendary extensions.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Move lua/plugins/better-escape.lua to lua/plugins/editor/better-escape.lua\n2. Convert better-escape to LazySpec format, keep event=\"InsertEnter\" for lazy loading\n3. Add opts = {} to better-escape since current setup uses defaults\n4. Move lua/plugins/legendary.lua to lua/plugins/util/legendary.lua (create util/ if needed)\n5. Update legendary to LazySpec format, preserve priority=10000 and lazy=false\n6. Maintain legendary extensions: lazy_nvim, nvim_tree, diffview, which_key integration\n7. Update type annotations from NvPluginSpec to LazySpec",
+            "status": "pending",
+            "testStrategy": "1. Test better-escape: enter insert mode, type 'jk' or 'jj' quickly to escape to normal mode\n2. Test legendary: run :Legendary command, verify keymaps are listed\n3. Verify which-key integration works with legendary\n4. Ensure both plugins load at appropriate times"
+          },
+          {
+            "id": 4,
+            "title": "Extend treesitter configuration for LazyVim",
+            "description": "Update nvim-treesitter config to extend LazyVim's treesitter setup, preserving custom ensure_installed parsers, textobjects configuration, and dependencies (nvim-ts-autotag, treesitter-context).",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Update lua/plugins/core/nvim-treesitter.lua to use opts function pattern for extending LazyVim config\n2. Use vim.list_extend for ensure_installed to add parsers: go, hcl, kotlin, make, terraform, twig, gomod, gosum, gotmpl, gowork\n3. Preserve textobjects configuration: swap (sa/sA), move (]m/[m, ]], [[), select (af/if/ac/ic/as)\n4. Keep nvim-ts-autotag dependency with enable_close, enable_rename options\n5. Maintain nvim-treesitter-context with <leader>oc toggle and [c jump to context\n6. Update type annotation to LazySpec\n7. Ensure textobjects from nvim-treesitter-textobjects are properly configured",
+            "status": "pending",
+            "testStrategy": "1. Verify all parsers install with :TSInstallInfo\n2. Test textobject selection: vaf (select function), vac (select class)\n3. Test textobject movement: ]m (next function), [[ (previous class)\n4. Test parameter swap: sa (swap next), sA (swap previous)\n5. Test treesitter-context toggle with <leader>oc"
+          },
+          {
+            "id": 5,
+            "title": "Clean up obsolete navigation plugins and finalize migration",
+            "description": "Remove or disable navigation plugins now handled by LazyVim extras (telescope, todo-comments, project, cinnamon), update imports, and verify editor plugin directory structure.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "1. Evaluate telescope.lua: if using LazyVim's telescope extra, disable it or convert custom pickers/extensions (undo, fzf, projects, persisted) to extend LazyVim's config\n2. For todo-comments.lua: either delete (LazyVim provides default) or convert to extension keeping custom keywords and colors\n3. Delete cinnamon.lua (already enabled=false, smooth scrolling not needed)\n4. For project.lua: if LazyVim has project extra, migrate detection patterns or disable\n5. Delete old navigation/ files that have been moved: nvim-tree.lua, flash.lua\n6. Update lua/plugins/init.lua if needed to include editor/ and util/ directories\n7. Verify no duplicate plugin definitions exist",
+            "status": "pending",
+            "testStrategy": "1. Run :Lazy and verify no duplicate plugins or errors\n2. Test telescope commands still work: <leader>ff, <leader>fw, <leader>fp\n3. Test todo-comments: <leader>fT should open TodoTelescope\n4. Verify project detection works in a git repository\n5. Ensure no leftover files in navigation/ that were supposed to be moved"
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Preserve Filetype Detection and Custom Snippets",
+        "description": "Ensure ftdetect/ files (Dockerfile, Terraform, Ansible, Docker Compose, GitHub Actions YAML) and custom snippets (snipmate/vscode) continue to work with LazyVim.",
+        "details": "## Implementation Steps\n\n### 1. Verify ftdetect/ files are loaded\n\nThe following files should work without modification:\n- ftdetect/dockerfile.vim\n- ftdetect/terraform.vim\n- ftdetect/yaml.ansible.vim\n- ftdetect/yaml.docker-compose.vim\n- ftdetect/yaml.ghaction.vim\n\nLazyVim doesn't override ftdetect, so these should continue working.\n\n### 2. Verify snippet integration\n\nSnippets location:\n- snippets/snipmate/go.snippets\n- snippets/snipmate/text.snippets\n- snippets/snipmate/cpp.snippets\n- snippets/snipmate/lua.snippets\n- snippets/vscode/cpp.json\n- snippets/vscode/package.json\n\nLazyVim's luasnip extra handles snippet loading. Verify paths in luasnip config:\n\n```lua\n---@type LazySpec\nreturn {\n  \"L3MON4D3/LuaSnip\",\n  opts = function(_, opts)\n    -- Ensure custom snippet paths are included\n    local luasnip = require(\"luasnip\")\n    \n    -- Load snipmate snippets\n    require(\"luasnip.loaders.from_snipmate\").lazy_load({\n      paths = { vim.fn.stdpath(\"config\") .. \"/snippets/snipmate\" },\n    })\n    \n    -- Load vscode snippets\n    require(\"luasnip.loaders.from_vscode\").lazy_load({\n      paths = { vim.fn.stdpath(\"config\") .. \"/snippets/vscode\" },\n    })\n    \n    return opts\n  end,\n}\n```\n\n### 3. Check ftplugin/ integration\n\nLazyVim respects ftplugin/ directory for filetype-specific settings.\nVerify any existing ftplugin files continue to work.\n\n### 4. Verify filetype detection works\n\nTest each custom filetype detection:\n\n```vim\n\" Test Dockerfile detection\n:e Dockerfile\n:set ft?  \" Should show dockerfile\n\n\" Test Terraform detection\n:e main.tf\n:set ft?  \" Should show terraform\n\n\" Test Ansible YAML detection\n:e playbook.yaml  \" In ansible project\n:set ft?  \" Should show yaml.ansible\n\n\" Test Docker Compose detection\n:e docker-compose.yml\n:set ft?  \" Should show yaml.docker-compose\n\n\" Test GitHub Actions detection\n:e .github/workflows/ci.yml\n:set ft?  \" Should show yaml.ghaction\n```\n\n### 5. Handle kubernetes-schema-snippets\n\nFrom lua/plugins/langs/kubernetes-schema-snippets.lua:\n```lua\n---@type LazySpec\nreturn {\n  \"cstahlhut/kubernetes-schema-snippets.nvim\",\n  -- Keep existing configuration\n}\n```\n\n### 6. Keep after/ directory configurations\n\nThe after/ directory is used for late-loading configs.\nLazyVim respects this directory structure.",
+        "testStrategy": "1. Test Dockerfile filetype:\n   - Create/open Dockerfile\n   - Run `:set ft?` → should show 'dockerfile'\n   - Verify dockerls LSP attaches\n2. Test Terraform filetype:\n   - Open `.tf` file\n   - Verify 'terraform' filetype\n   - Verify terraformls LSP attaches\n3. Test YAML subtypes:\n   - Open `playbook.yaml` in ansible dir → yaml.ansible\n   - Open `docker-compose.yml` → yaml.docker-compose\n   - Open `.github/workflows/*.yml` → yaml.ghaction\n4. Test Go snippets:\n   - Open `.go` file\n   - Type snippet trigger (e.g., `func`)\n   - Tab to expand → verify custom snippets work\n5. Test snipmate and vscode snippets load:\n   - `:LuaSnipListAvailable` or use completion\n   - Verify custom snippets appear",
+        "priority": "low",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create LuaSnip Configuration with Custom Snippet Paths",
+            "description": "Configure LuaSnip to load custom snippets from both snipmate and vscode format directories under LazyVim's plugin system.",
+            "dependencies": [],
+            "details": "Create lua/plugins/completion/luasnip.lua with LazyVim-compatible configuration. The config must:\n1. Extend LazyVim's LuaSnip setup using opts function\n2. Load snipmate snippets from vim.fn.stdpath('config')..'/snippets/snipmate' containing go.snippets, text.snippets, cpp.snippets, lua.snippets\n3. Load vscode snippets from vim.fn.stdpath('config')..'/snippets/vscode' containing cpp.json and package.json\n4. Use lazy_load() from both loaders: require('luasnip.loaders.from_snipmate').lazy_load() and require('luasnip.loaders.from_vscode').lazy_load()\n5. Preserve existing keymaps: <C-n>/<C-p> for snippet choice navigation, <M-c> for select_choice()\n6. Ensure compatibility with blink.cmp or nvim-cmp completion backends",
+            "status": "pending",
+            "testStrategy": "1. Open a Go file and type 'iferr' then trigger snippet expansion - should expand to if err != nil block\n2. Open a Lua file and type 'add' - should expand to NvPluginSpec template\n3. Open a C++ file and type 'cpt' - should expand to competitive programming template\n4. Use :LuaSnipListAvailable to verify all custom snippets are loaded\n5. Test <C-n>/<C-p> choice navigation with multi-choice snippets"
+          },
+          {
+            "id": 2,
+            "title": "Verify and Document ftdetect/ Filetype Detection Compatibility",
+            "description": "Confirm all custom ftdetect/ files continue to work with LazyVim and document any required adjustments.",
+            "dependencies": [],
+            "details": "Verify the following ftdetect files work correctly:\n1. ftdetect/dockerfile.vim - detects Dockerfile*, *dockerfile* patterns\n2. ftdetect/terraform.vim - converts 'tf' to 'terraform', handles *.tfvars.sops\n3. ftdetect/yaml.ansible.vim - detects main.yml, site.yml, */ansible/*, */playbooks/*, */roles/*, */tasks/*\n4. ftdetect/yaml.docker-compose.vim - detects docker-compose.yml/yaml, compose.yml/yaml\n5. ftdetect/yaml.ghaction.vim - detects .github/workflows/*.yml/yaml\n\nLazyVim respects Neovim's runtime path, so ftdetect/ should load automatically. Test each pattern and document if any conflicts exist with LazyVim's built-in filetype detection. Create fallback autocommands in lua/config/autocmds.lua if needed.",
+            "status": "pending",
+            "testStrategy": "Test each filetype detection:\n1. :e Dockerfile → :set ft? should show 'dockerfile'\n2. :e main.tf → :set ft? should show 'terraform'\n3. :e test.tfvars.sops → :set ft? should show 'terraform'\n4. :e playbooks/main.yml → :set ft? should show 'yaml.ansible'\n5. :e docker-compose.yml → :set ft? should show 'yaml.docker-compose'\n6. :e .github/workflows/ci.yml → :set ft? should show 'yaml.ghaction'"
+          },
+          {
+            "id": 3,
+            "title": "Migrate ftplugin/ Files for Java and Terraform",
+            "description": "Ensure ftplugin/java.lua and ftplugin/terraform.lua continue working with LazyVim's LSP configuration.",
+            "dependencies": [],
+            "details": "Review and migrate existing ftplugin files:\n1. ftplugin/java.lua - Complex JDTLS configuration with:\n   - Mason paths for java-debug-adapter, java-test, jdtls, lombok\n   - Custom bundles for debug and test\n   - Root markers detection (git, mvnw, gradlew, pom.xml, build.gradle)\n   - Custom keymaps (A-o, crv, crc, crm)\n   - Custom commands (JdtCompile, JdtSetRuntime, etc.)\n   - Update on_attach and capabilities to use LazyVim's LSP utilities instead of require('plugins.lsp.opts')\n2. ftplugin/terraform.lua - Simple commentstring override (vim.bo.commentstring = '#%s')\n\nFor Java, consider using LazyVim's java extra as base and extending it, or keep the custom ftplugin with updated require paths.",
+            "status": "pending",
+            "testStrategy": "1. Open a .java file in a Maven/Gradle project\n2. Verify JDTLS attaches with :LspInfo\n3. Test Java-specific keymaps: crv (extract variable), crc (extract constant)\n4. Test :JdtCompile and :JdtUpdateConfig commands\n5. Open a .tf file and verify comment string with gcc"
+          },
+          {
+            "id": 4,
+            "title": "Preserve after/queries/yaml/injections.scm Treesitter Queries",
+            "description": "Ensure custom Treesitter injection queries for YAML/Jinja2 templating continue to work with LazyVim.",
+            "dependencies": [],
+            "details": "The after/queries/yaml/injections.scm file extends YAML treesitter to inject twig/jinja2 highlighting for template strings containing {{ }} and {% %}. This file:\n1. Uses '; extends' to add to existing queries\n2. Targets block_mapping_pair values (block_scalar, double_quote_scalar, single_quote_scalar, plain_scalar)\n3. Sets injection.language to 'twig' for Jinja2-like templates\n\nLazyVim respects after/queries directory. Verify:\n1. The twig treesitter parser is installed (via nvim-treesitter ensure_installed)\n2. Injection queries load correctly when editing YAML files with Jinja2 templates\n3. Consider adding twig to LazyVim's treesitter ensure_installed list in lua/plugins/treesitter.lua",
+            "status": "pending",
+            "testStrategy": "1. Open a YAML file containing {{ variable }} template syntax (e.g., Ansible playbook)\n2. Verify Jinja2/twig syntax highlighting applies to template expressions\n3. Check :InspectTree to confirm injection queries are active\n4. Verify no errors in :checkhealth nvim-treesitter"
+          },
+          {
+            "id": 5,
+            "title": "Migrate kubernetes-schema-snippets Plugin",
+            "description": "Ensure the kubernetes-schema-snippets.nvim plugin continues to work with LazyVim's LuaSnip configuration.",
+            "dependencies": [
+              1
+            ],
+            "details": "Migrate lua/plugins/langs/kubernetes-schema-snippets.lua to LazyVim structure:\n1. Current config: KevinNitroG/kubernetes-schema-snippets.nvim with ft='yaml', config=true, depends on LuaSnip\n2. Create new spec in lua/plugins/langs/kubernetes-schema-snippets.lua maintaining:\n   - Filetype trigger: ft = 'yaml'\n   - LuaSnip dependency\n   - config = true for default setup\n3. Verify compatibility with LazyVim's LuaSnip extra\n4. Ensure kubernetes schema snippets appear in completion when editing YAML files for Kubernetes resources (deployment, service, configmap, etc.)\n5. Test alongside custom snippets from subtask 1 to ensure no conflicts",
+            "status": "pending",
+            "testStrategy": "1. Open a YAML file (e.g., deployment.yaml)\n2. Type 'dep' or common Kubernetes snippet prefixes\n3. Verify Kubernetes schema snippets appear in completion\n4. Expand a deployment snippet and verify correct YAML structure\n5. Test alongside custom snipmate/vscode snippets - both should coexist"
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Cleanup and Documentation Update",
+        "description": "Remove obsolete files, update CLAUDE.md documentation to reflect new LazyVim architecture, clean up lazy-lock.json, and format all Lua files with stylua.",
+        "details": "## Implementation Steps\n\n### 1. Delete obsolete files\n\n**Core files to delete:**\n- lua/core/lazy.lua (replaced by config/lazy.lua)\n- lua/core/messages.lua (if not used)\n- lua/vscode-config.lua (if not migrating VSCode support)\n- lua/mappings.lua (merged into config/keymaps.lua)\n- lua/options.lua (merged into config/options.lua)\n\n**Plugin files now handled by LazyVim:**\n- lua/plugins/completion/blink-cmp.lua\n- lua/plugins/completion/nvim-cmp.lua\n- lua/plugins/core/nvim-treesitter.lua (extend only)\n- lua/plugins/core/which-key.lua (extend only)\n- lua/plugins/navigation/telescope.lua (use LazyVim default)\n- lua/plugins/navigation/flash.lua (extend only)\n- lua/plugins/sessions/auto-session.lua (use LazyVim persistence)\n- lua/plugins/terminal/toggleterm.lua (use LazyVim terminal)\n- lua/plugins/testing/neotest.lua (use LazyVim test extra)\n- lua/plugins/lsp/configs/mason.lua (LazyVim handles)\n\n**Empty plugin directories to clean up:**\n- Remove empty directories after file migrations\n\n### 2. Update CLAUDE.md documentation\n\nUpdate sections:\n- Overview: Mention LazyVim foundation with NvChad UI option\n- Directory structure: New config/ and plugin categories\n- Plugin management: LazyVim extras via lazyvim.json\n- Customization layers: LazyVim defaults → personal overrides\n- Key integration points: LazyVim patterns\n\n### 3. Update README.md\n\n- Update installation instructions\n- Document LazyVim extras usage\n- Update requirements section\n- Add migration notes if keeping history\n\n### 4. Clean up lazy-lock.json\n\nAfter all migrations:\n```bash\n# Open Neovim and sync plugins\nnvim --headless \"+Lazy sync\" +qa\n\n# This regenerates lazy-lock.json with new plugin structure\n```\n\n### 5. Format all Lua files\n\n```bash\nstylua lua/ --config-path .stylua.toml\n```\n\n### 6. Verify .stylua.toml settings\n\nExisting settings should work:\n- column_width = 120\n- indent_type = Spaces\n- indent_width = 2\n- quote_style = AutoPreferDouble\n- call_parentheses = None\n\n### 7. Final cleanup checklist\n\n- [ ] All `---@type NvPluginSpec` changed to `---@type LazySpec`\n- [ ] No broken requires to deleted files\n- [ ] No duplicate plugin definitions\n- [ ] Git status clean (commit changes)\n- [ ] Startup time acceptable (`:Lazy profile`)\n- [ ] No errors in `:checkhealth`\n- [ ] All custom keybindings work\n- [ ] All LSP servers functional",
+        "testStrategy": "1. Full startup test:\n   - `nvim --headless +qa` - no errors\n   - `:messages` - no warnings\n2. Health check:\n   - `:checkhealth` - all green or expected warnings\n   - `:checkhealth lazy` - plugin manager healthy\n   - `:checkhealth lsp` - LSP configured correctly\n3. Formatting verification:\n   - Run `stylua --check lua/`\n   - No formatting issues\n4. Plugin sync:\n   - `:Lazy sync` completes successfully\n   - lazy-lock.json updated\n5. Documentation review:\n   - CLAUDE.md accurately describes new structure\n   - README.md instructions work for fresh install\n6. Performance check:\n   - `:Lazy profile` - startup time acceptable\n   - Compare with pre-migration baseline if available",
+        "priority": "low",
+        "dependencies": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Delete obsolete core and plugin files after LazyVim migration",
+            "description": "Remove files that are no longer needed after the LazyVim migration, including core lazy.nvim bootstrap, old config files, and plugin files now handled by LazyVim extras.",
+            "dependencies": [],
+            "details": "Delete the following files that have been superseded by LazyVim:\n\n**Core files to delete:**\n- lua/core/lazy.lua (replaced by LazyVim's lazy config)\n- lua/core/messages.lua (if not used elsewhere)\n- lua/vscode-config.lua (if VSCode support not being migrated)\n- lua/mappings.lua (merged into config/keymaps.lua)\n- lua/options.lua (merged into config/options.lua)\n\n**Plugin files now handled by LazyVim extras:**\n- lua/plugins/completion/blink-cmp.lua\n- lua/plugins/completion/nvim-cmp.lua\n- lua/plugins/core/nvim-treesitter.lua (unless extending)\n- lua/plugins/core/which-key.lua (unless extending)\n- lua/plugins/navigation/telescope.lua (use LazyVim default)\n- lua/plugins/navigation/flash.lua (unless extending)\n- lua/plugins/sessions/auto-session.lua (use LazyVim persistence)\n- lua/plugins/terminal/toggleterm.lua (use LazyVim terminal)\n- lua/plugins/testing/neotest.lua (use LazyVim test extra)\n- lua/plugins/lsp/configs/mason.lua (LazyVim handles Mason)\n\n**Verification steps:**\n1. Before deleting, grep for any requires/imports of these files\n2. Ensure no other files depend on functions from deleted files\n3. Remove files using git rm to track changes\n4. Clean up any empty directories left behind",
+            "status": "pending",
+            "testStrategy": "After deletion:\n1. Run `nvim --headless +qa` to verify startup succeeds\n2. Check `:messages` for any 'module not found' errors\n3. Verify no broken requires with `:checkhealth`\n4. Run `:Lazy` to ensure plugin manager works"
+          },
+          {
+            "id": 2,
+            "title": "Update CLAUDE.md to reflect new LazyVim architecture",
+            "description": "Rewrite CLAUDE.md documentation to accurately describe the new LazyVim-based architecture, replacing references to NvChad patterns.",
+            "dependencies": [
+              1
+            ],
+            "details": "Update the following sections in CLAUDE.md:\n\n**Overview section:**\n- Change 'built on NvChad foundation' to 'built on LazyVim foundation'\n- Mention LazyVim extras system\n- Update the fork reference if applicable\n\n**Entry Point & Load Sequence:**\n- Update to reflect LazyVim bootstrap in config/lazy.lua\n- Document new loading order: lazy.lua → options → keymaps → autocmds\n- Remove NvChad-specific loading steps\n\n**Directory Structure:**\n- Update to show new LazyVim structure:\n  - lua/config/lazy.lua (lazy.nvim bootstrap)\n  - lua/config/options.lua (vim options)\n  - lua/config/keymaps.lua (keybindings)\n  - lua/config/autocmds.lua (autocommands)\n  - lua/plugins/ (plugin specs)\n  - lazyvim.json (extras configuration)\n\n**Plugin Management:**\n- Document LazyVim extras via lazyvim.json\n- Explain how to enable/disable extras\n- Update plugin spec patterns for LazyVim\n\n**Customization Layers:**\n- LazyVim defaults → lua/plugins/ overrides → personal serpro69/ overrides\n- Document how to extend vs override LazyVim plugins\n\n**Key Integration Points:**\n- Update LSP section for LazyVim's lsp extra\n- Update formatting/linting for LazyVim patterns\n- Update completion section for LazyVim defaults",
+            "status": "pending",
+            "testStrategy": "1. Review updated CLAUDE.md for accuracy\n2. Verify all file paths mentioned exist in the new structure\n3. Test that documented commands work correctly\n4. Ensure code examples use correct LazyVim patterns"
+          },
+          {
+            "id": 3,
+            "title": "Clean up and regenerate lazy-lock.json",
+            "description": "Remove outdated entries from lazy-lock.json and regenerate it with the new plugin structure after LazyVim migration.",
+            "dependencies": [
+              1
+            ],
+            "details": "Steps to clean up lazy-lock.json:\n\n1. **Backup current lock file:**\n   ```bash\n   cp lazy-lock.json lazy-lock.json.backup\n   ```\n\n2. **Delete the existing lazy-lock.json:**\n   ```bash\n   rm lazy-lock.json\n   ```\n\n3. **Open Neovim and sync plugins:**\n   ```bash\n   nvim --headless '+Lazy sync' +qa\n   ```\n   This regenerates lazy-lock.json with:\n   - LazyVim and its dependencies\n   - Enabled LazyVim extras\n   - Custom plugins from lua/plugins/\n   - Removed entries for deleted plugins\n\n4. **Verify the new lock file:**\n   - Check that LazyVim is listed as a dependency\n   - Confirm removed plugins are not in the lock file\n   - Verify custom plugins are still present\n\n5. **Alternative: If issues arise:**\n   ```bash\n   nvim --headless '+Lazy clean' '+Lazy sync' +qa\n   ```\n   This removes unused plugins first then syncs",
+            "status": "pending",
+            "testStrategy": "1. Compare plugin count before/after (should decrease)\n2. Run `:Lazy` in Neovim and verify no errors\n3. Check `:Lazy profile` shows reasonable load times\n4. Verify `:checkhealth lazy` passes"
+          },
+          {
+            "id": 4,
+            "title": "Format all Lua files with stylua",
+            "description": "Run stylua formatter on the entire lua/ directory to ensure consistent code formatting across all configuration files.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Execute stylua formatting across the codebase:\n\n1. **Verify stylua is installed:**\n   ```bash\n   stylua --version\n   ```\n   If not installed: `cargo install stylua` or use Mason\n\n2. **Verify .stylua.toml settings:**\n   Current settings (confirmed correct):\n   - column_width = 120\n   - line_endings = Unix\n   - indent_type = Spaces\n   - indent_width = 2\n   - quote_style = AutoPreferDouble\n   - call_parentheses = None\n\n3. **Run stylua on all Lua files:**\n   ```bash\n   stylua lua/ --config-path .stylua.toml\n   ```\n\n4. **Check for any files that couldn't be formatted:**\n   ```bash\n   stylua lua/ --config-path .stylua.toml --check\n   ```\n\n5. **Also format after/ directory if it contains Lua files:**\n   ```bash\n   stylua after/ --config-path .stylua.toml 2>/dev/null || true\n   ```\n\n6. **Review changes:**\n   ```bash\n   git diff --stat lua/\n   ```",
+            "status": "pending",
+            "testStrategy": "1. Run `stylua lua/ --check` to verify all files pass\n2. Open random Lua files to verify formatting looks correct\n3. Start Neovim and verify no syntax errors from formatting\n4. Check indentation is 2 spaces, quotes are double"
+          },
+          {
+            "id": 5,
+            "title": "Final verification and cleanup checklist",
+            "description": "Run comprehensive verification tests to ensure the cleanup was successful and all LazyVim functionality works correctly.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Execute final verification checklist:\n\n**1. Type annotation cleanup:**\n- Search for `---@type NvPluginSpec` and change to `---@type LazySpec`\n   ```bash\n   grep -r 'NvPluginSpec' lua/\n   ```\n\n**2. Check for broken requires:**\n   ```bash\n   grep -r \"require.*core.lazy\\|require.*mappings\\|require.*options\" lua/ init.lua\n   ```\n\n**3. Check for duplicate plugin definitions:**\n   ```bash\n   grep -rh '\"[a-zA-Z0-9-]*/[a-zA-Z0-9.-]*\"' lua/plugins/ | sort | uniq -d\n   ```\n\n**4. Startup verification:**\n   ```bash\n   nvim --headless +qa && echo 'Startup OK'\n   ```\n\n**5. Health checks:**\n   - `:checkhealth` - all green or expected warnings\n   - `:checkhealth lazy` - plugin manager healthy\n   - `:checkhealth lsp` - LSP configured correctly\n\n**6. Performance check:**\n   - `:Lazy profile` - check startup time is acceptable\n   - Compare with pre-migration baseline if available\n\n**7. Functional tests:**\n   - Verify LSP servers start for test files\n   - Test custom keybindings still work\n   - Verify completion works\n   - Test debugging if used\n\n**8. Git cleanup:**\n   ```bash\n   git status  # Should show only intentional changes\n   git add -A && git commit -m 'chore: cleanup after LazyVim migration'\n   ```",
+            "status": "pending",
+            "testStrategy": "1. `nvim --headless +qa` exits with code 0\n2. `:messages` shows no errors\n3. `:checkhealth` shows no critical issues\n4. `:Lazy profile` shows acceptable startup time (<200ms ideally)\n5. All custom keybindings respond correctly\n6. LSP attaches to test files of various languages"
           }
         ]
       }
     ],
     "metadata": {
       "created": "2025-11-04T17:13:17.171Z",
-      "updated": "2025-11-04T17:13:17.171Z",
+      "updated": "2025-12-07T14:47:23.662Z",
       "description": "Tasks for master context"
     }
   }
